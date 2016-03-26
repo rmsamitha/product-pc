@@ -134,22 +134,22 @@ asset.renderer = function (ctx) {
             } else {
                 page.bpmnAvaliable = true;
             }
-            if (page.assets.tables[9].fields.bpmnDesignPath.value == "NA") {
+            if (page.assets.tables[10].fields.bpmnDesignPath.value == "NA") {
                 page.bpmnDesignAvailable = false;
             } else {
                 page.bpmnDesignAvailable = true;
             }
 
-            if (page.assets.tables[5].fields.documentname.value == "NA") {
+            var processName = page.assets.tables[0].fields.name.value;
+            var processVersion = page.assets.tables[0].fields.version.value;
+            if (log.isDebugEnabled()) {
+                log.debug("Viewing Process (Name):" + page.assets.tables[0].fields.name.value + ": (Version)" + page.assets.tables[0].fields.version.value);
+            }
+            if (page.assets.tables[6].fields.documentname.value == "NA") {
                 page.documentAvailable = false;
             } else {
                 page.documentAvailable = true;
             }
-
-            var processName=page.assets.tables[0].fields.name.value;
-            var processVersion=page.assets.tables[0].fields.version.value;
-            log.info("Process Name:" + page.assets.tables[0].fields.name.value);
-            log.info("Process Version:" + page.assets.tables[0].fields.version.value);
 
             importPackage(org.wso2.carbon.pc.core);
             var ps = new ProcessStore();
@@ -158,56 +158,33 @@ asset.renderer = function (ctx) {
             if (log.isDebugEnabled()) {
                 log.debug(conObject);
             }
+
             page.involveProcessList = conObject;
-            if (log.isDebugEnabled()) {
-                log.debug(page);
-            }
 
             importPackage(org.wso2.carbon.pc.analytics.core.utils);
-            //var au=new AnalyticsUtils();
             page.DASAnalyticsEnabled = AnalyticsUtils.isDASAnalyticsActivated();
-            log.info("CZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n");
-
-            log.info("string list:"+conData);
-            log.info("json object:"+conObject);
             importPackage(org.wso2.carbon.pc.analytics.config.utils);
-            page.DASAnalyticsConfigured=DASConfigurationUtils.isDASAnalyticsConfigured(processName,processVersion);
-            //log.info(page);
+            page.DASAnalyticsConfigured = DASConfigurationUtils.isDASAnalyticsConfigured(processName, processVersion);
 
             var processVariablesJObArrStr;
-            if(page.DASAnalyticsConfigured) {
+            if (page.DASAnalyticsConfigured) {
                 processVariablesJObArrStr = ps.getProcessVariablesList(resourcePath);
 
                 var processVariablesJObArr = JSON.parse(processVariablesJObArrStr);
                 page.processVariableList = processVariablesJObArr;
-
-                log.info("arrya sring:" + processVariablesJObArrStr);
-                log.info("Array:" + processVariablesJObArr);
-                log.info("List:" + page.processVariableList);
-                log.info("It is:" + page.processVariableList[1]);
-
-                for (var key in page.processVariableList) {
-                    log.info("PPP");
-                    if (page.processVariableList.hasOwnProperty(key)) {
-                        log.info(key + " -> " + page.processVariableList["name"]);
-                    }
-                }
             }
 
-            var flowchartPath = resourcePath.replace("processes", "flowchart");
-            var flowchartString = ps.getFlowchart(flowchartPath);
-            if(flowchartString != "NA") {
-                var flowchartPath = page.assets.tables[8].fields.path.value;
-                if (flowchartPath != "NA") {
-                    page.flowchartAvailable = true;
-                    page.flowchartPath = flowchartPath;
-                } else {
-                    page.flowchartAvailable = false;
-                }
-
-                log.info(page);
+            var flowchartPath = page.assets.tables[9].fields.path.value;
+            if(flowchartPath != "NA"){
+                page.flowchartAvailable = true;
+                page.flowchartPath = flowchartPath;
+            }else{
+                page.flowchartAvailable = false;
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug(page);
+            }
         }
     };
 };

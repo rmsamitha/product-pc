@@ -35,7 +35,5 @@
             <xs:element name="path" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
-
-
 </xs:schema>
 

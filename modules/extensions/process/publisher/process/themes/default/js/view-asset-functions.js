@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -50,6 +50,8 @@ function showBPMN() {
     $("#flowChartEditorView").hide();
     $("#docUploaderDiv").hide();
     $("#docViewDiv").hide();
+    $("#analyticsConfigDiv").hide();
+
 
     $.ajax({
         url: '/publisher/assets/process/apis/get_bpmn_content?bpmn_content_path=/_system/governance/bpmn/' + fieldsName + "/" + fieldsVersion,
@@ -78,6 +80,8 @@ function viewText() {
     $("#flowChartEditorView").hide();
     $("#docUploaderDiv").hide();
     $("#docViewDiv").hide();
+    $("#analyticsConfigDiv").hide();
+
 }
 
 function editText() {
@@ -212,13 +216,14 @@ function showDocument() {
     $("#flowChartEditorView").hide();
     $("#docUploaderDiv").hide();
     $("#docViewDiv").show();
+    $("#analyticsConfigDiv").hide();
 
     $.ajax({
         url: '/publisher/assets/process/apis/get_process_doc?process_path=/_system/governance/processes/' + fieldsName + "/" + fieldsVersion,
         type: 'GET',
         success: function (data) {
             var response = JSON.parse(data);
-            for(var i = 0; i < response.length; i++){
+            for (var i = 0; i < response.length; i++) {
                 var table = document.getElementById("docTable");
                 var rowCount = table.rows.length;
                 var row = table.insertRow(rowCount);
@@ -229,7 +234,7 @@ function showDocument() {
                 cellDocName.innerHTML = response[i].documentname;
                 cellDocSummary.innerHTML = response[i].summary;
 
-                if(response[i].url != "NA") {
+                if (response[i].url != "NA") {
                     var anchorUrlElement = document.createElement("a");
                     anchorUrlElement.setAttribute("id", "documentUrl" + i);
                     anchorUrlElement.setAttribute("href", response[i].url);
@@ -240,11 +245,11 @@ function showDocument() {
                     cellDocUrl.innerHTML = response[i].url;
                 }
 
-                if(response[i].path != "NA") {
+                if (response[i].path != "NA") {
                     var anchorElement = document.createElement("a");
                     anchorElement.setAttribute("id", "document" + i);
                     var path = response[i].path;
-                    anchorElement.onclick = function() {
+                    anchorElement.onclick = function () {
                         var currentPath = path;
                         downloadDocument(currentPath);
                     };
@@ -272,6 +277,7 @@ function associateDoc() {
     $("#flowChartEditorView").hide();
     $("#docUploaderDiv").show();
     $("#docViewDiv").hide();
+    $("#analyticsConfigDiv").hide();
 }
 
 function newDocFormToggle() {
@@ -279,28 +285,27 @@ function newDocFormToggle() {
 }
 
 function showAnalyticsConfigurer() {
-        $("#overviewDiv").hide();
-        $("#processTextContainer").hide();
-        $("#processTextEditDiv").hide();
-        $("#bpmnViewDiv").hide();
-        $("#analyticsConfigDiv").show();
-        $('#eventStreamName').val($('#view-header').text()+"_"+$('#process-version').text()+"_process_stream");
-        $('#eventStreamName').attr("readonly","true");
+    $("#overviewDiv").hide();
+    $("#processTextContainer").hide();
+    $("#processTextEditDiv").hide();
+    $("#bpmnViewDiv").hide();
+    $("#analyticsConfigDiv").show();
+    $('#eventStreamName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream");
+    $('#eventStreamName').attr("readonly", "true");
 
-        $('#eventStreamVersion').val("1.0.0");
-        $('#eventStreamVersion').attr("readonly","true");
+    $('#eventStreamVersion').val("1.0.0");
+    $('#eventStreamVersion').attr("readonly", "true");
 
-        $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with DAS, for the process"+$('#view-header').text()+"_"+$('#process-version').text());
-        $('#eventStreamDescription').attr("readonly","true");
+    $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with DAS, for the process" + $('#view-header').text() + "_" + $('#process-version').text());
+    $('#eventStreamDescription').attr("readonly", "true");
 
-        $('#eventReceiverName').val($('#view-header').text()+"_"+$('#process-version').text()+"_process_receiver");
-        $('#eventReceiverName').attr("readonly","true");
+    $('#eventReceiverName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_receiver");
+    $('#eventReceiverName').attr("readonly", "true");
 
-        $('#eventStreamNickName').val($('#view-header').text()+"_"+$('#process-version').text()+"_process_stream"); //same as eventStreamName
-        $('#eventStreamNickName').attr("readonly","true");
+    $('#eventStreamNickName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream"); //same as eventStreamName
+    $('#eventStreamNickName').attr("readonly", "true");
+}
 
-
-    }
 function editProcessOwner(e) {
     if ($(e).text() == '') {
         alertify.error('Process owner field is empty.');
@@ -677,7 +682,6 @@ function addUnboundedRow(element) {
     }
 }
 
-
 //****************************PDF rendering*************************************************
 
 function showPDF() {
@@ -691,6 +695,7 @@ function showPDF() {
     $("#flowChartEditorView").hide();
     $("#docUploaderDiv").hide();
     $("#docViewDiv").hide();
+    $("#analyticsConfigDiv").hide();
 
     if (pdfDoc == null) {
         loadPdf();
@@ -707,6 +712,7 @@ function associatePdf(element) {
     $("#flowChartEditorView").hide();
     $("#docUploaderDiv").hide();
     $("#docViewDiv").hide();
+    $("#analyticsConfigDiv").hide();
 }
 
 function loadPdf() {
@@ -839,6 +845,7 @@ function associateEditorFlowChart(name) {
     $("#docView").hide();
     $("#bpmnView").hide();
     $("#processTextView").hide();
+    $("#analyticsConfigDiv").hide();
 }
 
 function showFlowchartEditor(name, flowchartPath) {
@@ -849,13 +856,14 @@ function showFlowchartEditor(name, flowchartPath) {
     $("#docView").hide();
     $("#bpmnView").hide();
     $("#processTextView").hide();
+    $("#analyticsConfigDiv").hide();
 
     flowchartPath = "/_system/governance/" + flowchartPath;
     $.ajax({
         url: '/publisher/assets/process/apis/get_process_flowchart',
         type: 'GET',
         dataType: 'text',
-        data: {'flowchartPath':flowchartPath},
+        data: {'flowchartPath': flowchartPath},
         success: function (data) {
             _loadEditableFlowChart(data, '#editor_canvas');
         },
@@ -866,7 +874,7 @@ function showFlowchartEditor(name, flowchartPath) {
 }
 
 function showbpmnDesign(name, bpmnDesignString) {
-   /* $('#flowchart-editor-header').text(name);*/
+    /* $('#flowchart-editor-header').text(name);*/
     $("#overviewDiv").hide();
     $("#bpmnEditorView").show();
     $("#pdfUploader").hide();
@@ -874,13 +882,14 @@ function showbpmnDesign(name, bpmnDesignString) {
     $("#bpmnView").hide();
     $("#processTextView").hide();
     $("#flowChartEditorView").hide();
+    $("#analyticsConfigDiv").hide();
     console.log(bpmnDesignString);
-   // uploadBPMN(bpmnDesignString);
+    // uploadBPMN(bpmnDesignString);
 
 }
 
 function associatebpmnDesignEditor(name) {
-  /*  $('#flowchart-editor-header').text(name);*/
+    /*  $('#flowchart-editor-header').text(name);*/
     $("#overviewDiv").hide();
     $("#flowChartEditorView").hide();
     $("#pdfUploader").hide();
@@ -888,6 +897,7 @@ function associatebpmnDesignEditor(name) {
     $("#bpmnView").hide();
     $("#processTextView").hide();
     $("#bpmnEditorView").show();
+    $("#analyticsConfigDiv").hide();
 }
 
 
@@ -895,6 +905,7 @@ function redirectTo(element) {
     element.click();
 }
 
+//******************************DAS Analytics Configuration***********************************
 function addProcessVariableRow(tableID) {
 
     var table = document.getElementById(tableID);
@@ -902,20 +913,20 @@ function addProcessVariableRow(tableID) {
     var rowCount = table.rows.length;
     var row = table.insertRow(rowCount);
 
-    var colCount =3;// table.rows[0].cells.length;
+    var colCount = 3;// table.rows[0].cells.length;
 
-    row.innerHTML=
+    row.innerHTML =
         //'<div style="width:300px; display:table">'+
-        '<td><input type="checkbox" name="chk"/></td>'+
+        '<td><input type="checkbox" name="chk"/></td>' +
 
-        '<td><input type="text" name="txt" style="display:table-cell; width:100%"/></td>'+
-        '<td>'+
-        '<select name="country" style="display:table-cell; width:100%">'+
-        '<option value="int">int</option>'+
-        '<option value="string">string</option>'+
-        '<option value="float">float</option>'+
-        '<option value="boolean">boolean</option>'+
-        '</select>'+
+        '<td><input type="text" name="txt" style="display:table-cell; width:100%"/></td>' +
+        '<td>' +
+        '<select name="country" style="display:table-cell; width:100%">' +
+        '<option value="int">int</option>' +
+        '<option value="string">string</option>' +
+        '<option value="float">float</option>' +
+        '<option value="boolean">boolean</option>' +
+        '</select>' +
         '</td>';//+
     // '</div>';
 }
@@ -946,13 +957,13 @@ function deleteProcessVariableRow(tableID) {
     }
 }
 
-var processVariablesInfo={};
-var processVariables={};
-var processVariablesObjsArr=[];
+var processVariablesInfo = {};
+var processVariables = {};
+var processVariablesObjsArr = [];
 
-function saveProcessVariables(tableID){
-    var table=document.getElementById(tableID);
-    var rowCount=table.rows.length;
+function saveProcessVariables(tableID) {
+    var table = document.getElementById(tableID);
+    var rowCount = table.rows.length;
 
     if (rowCount <= 1) {
         //alert("No rows to save.");
@@ -960,112 +971,139 @@ function saveProcessVariables(tableID){
         return "ERROR";
     }
 
-    var processName= $('#view-header').text();
-    var processVersion=$('#process-version').text();
-    processVariablesInfo["processName"]=processName;
-    processVariablesInfo["processVersion"]=processVersion;
+    var processName = $('#view-header').text();
+    var processVersion = $('#process-version').text();
+    processVariablesInfo["processName"] = processName;
+    processVariablesInfo["processVersion"] = processVersion;
+
+    //put processInstanceId as a compulsory field in the stream
+    processVariables["processInstanceId"] = "string";
+
 
     for (var i = 1; i < rowCount; i++) {
-        var item={};
+        var item = {};
         var row = table.rows[i];
-        if(!(row.cells[1].children[0].value)){
+        if (!(row.cells[1].children[0].value)) {
             alertify.error("Process Variable Names Cannot Be Empty");
             return "ERROR";
         }
-        var variableName=row.cells[1].children[0].value;
-        var variableType=row.cells[2].children[0].value;
+        var variableName = row.cells[1].children[0].value;
+        var variableType = row.cells[2].children[0].value;
 
-        if (null != variableName && null!=variableType) {
-            processVariables[variableName]=variableType;
-            item["name"]=variableName;
-            item["type"]=variableType;
+        if (null != variableName && null != variableType) {
+            processVariables[variableName] = variableType;
+            item["name"] = variableName;
+            item["type"] = variableType;
             processVariablesObjsArr.push(item);
         }
     }
-    processVariablesInfo["processVariables"]=processVariables;
+    processVariablesInfo["processVariables"] = processVariables;
 
     $.ajax({
         url: '/publisher/assets/process/apis/save_process_variables',
         type: 'POST',
-        data: {'processVariablesInfo': JSON.stringify(processVariablesInfo) },
+        data: {'processVariablesInfo': JSON.stringify(processVariablesInfo)},
         error: function () {
             alertify.error('Process variables saving error');
         }
     });
 }
 
-function configAnalytics(){
-    var isDasConfigedHidEl = $('#hiddenElementIsDASConfiged').val();
+function configAnalytics() {
+    var hiddenElementIsDASConfiged = $('#hiddenElementIsDASConfiged').val();
 
-    if(isDasConfigedHidEl=="false"){
-        flagToReturn=false;
-        if(!$('#eventStreamName').val()){
+    if (hiddenElementIsDASConfiged == "false") { //remove this check
+        flagToReturn = false;
+        if (!$('#eventStreamName').val()) {
             alertify.error("Event Stream Name Cannot be Empty");
-            flagToReturn=true;
+            flagToReturn = true;
         }
-        if(!$('#eventStreamVersion').val()){
+        if (!$('#eventStreamVersion').val()) {
             alertify.error("Event Stream Version Cannot be Empty");
-            flagToReturn=true;
+            flagToReturn = true;
         }
-        if(!$('#eventReceiverName').val()){
+        if (!$('#eventReceiverName').val()) {
             alertify.error("Event Receiver Name Cannot be Empty");
-            flagToReturn=true;
+            flagToReturn = true;
         }
 
-        if(flagToReturn){
+        if (flagToReturn) {
             return;
         }
 
-        if( saveProcessVariables('dataTable')=="ERROR"){
+        if (saveProcessVariables('dataTable') == "ERROR") {
             return;
         }
 
-        var eventStreamName=$('#eventStreamName').val();
-        var eventStreamVersion=$('#eventStreamVersion').val();
-        var eventStreamDescription=$('#eventStreamDescription').val();
-        var eventStreamNickName=$('#eventStreamNickName').val();
-        var eventReceiverName=$('#eventReceiverName').val();
+        var eventStreamName = $('#eventStreamName').val();
+        var eventStreamVersion = $('#eventStreamVersion').val();
+        var eventStreamDescription = $('#eventStreamDescription').val();
+        var eventStreamNickName = $('#eventStreamNickName').val();
+        var eventReceiverName = $('#eventReceiverName').val();
 
-        //var inputEventAdapterType=
-        var eventStreamId=eventStreamName+":"+eventStreamVersion;
-        var dasConfigData={};
-        dasConfigData["eventStreamName"]=eventStreamName;
-        dasConfigData["eventStreamVersion"]=eventStreamVersion;
-        dasConfigData["eventStreamDescription"]=eventStreamDescription;
-        dasConfigData["eventStreamNickName"]=eventStreamNickName;
-        dasConfigData["eventStreamId"]=eventStreamId;
-        dasConfigData["eventReceiverName"]=eventReceiverName;
-        dasConfigData["processVariables"]=processVariablesObjsArr;
+        var eventStreamId = eventStreamName + ":" + eventStreamVersion;
+        var dasConfigData = {};
+        dasConfigData["eventStreamName"] = eventStreamName;
+        dasConfigData["eventStreamVersion"] = eventStreamVersion;
+        dasConfigData["eventStreamDescription"] = eventStreamDescription;
+        dasConfigData["eventStreamNickName"] = eventStreamNickName;
+        dasConfigData["eventStreamId"] = eventStreamId;
+        dasConfigData["eventReceiverName"] = eventReceiverName;
+        dasConfigData["processVariables"] = processVariablesObjsArr;
 
-        var processName= $('#view-header').text();
-        var processVersion=$('#process-version').text();
+        var bpsConfigData={};
+       // bpsConfigData["processVariables"]=processVariablesObjsArr;
+
+        var processName = $('#view-header').text();
+        var processVersion = $('#process-version').text();
 
         $.ajax({
             url: '/publisher/assets/process/apis/config_das_analytics',
             type: 'POST',
-            data: {'dasConfigData': JSON.stringify(dasConfigData),'processName':processName, 'processVersion':processVersion },
-            success:function(configurationStatus){
-                if(configurationStatus=="true"){
+            data: {
+                'dasConfigData': JSON.stringify(dasConfigData),
+                'processName': processName,
+                'processVersion': processVersion
+            },
+            success: function (DASconfigurationStatus) {
+                if (DASconfigurationStatus == "true") {
+                    alertify.success("Analytics Configuration Success");
                     showOverview(this);
-                    //document.getElementById("btn_config_analytics").hidden=true;
-                    //$("#btn_config_analytics").hide();
-                    //$("#btn_config_analytics").attr('disabled', true);
                     document.getElementById("btn_config_analytics").innerHTML = "View Analytics Configs";
-                    //$("#btn_config_analytics").attr("textContent","View Analytics Configs");
-                    //$("#btn_config_analytics").innerHTML = "View Analytics Configs";
-                    $("#btn_save_analytics_configurations").attr("disabled",true);
-                    $("#btn_addProcessVariablesRow").attr("disabled",true);
-                    $("#btn_deleteProcessVariablesRow").attr("disabled",true);
+                    $("#btn_save_analytics_configurations").attr("disabled", true);
+                    $("#btn_addProcessVariablesRow").attr("disabled", true);
+                    $("#btn_deleteProcessVariablesRow").attr("disabled", true);
                     ///
                     /*$("#dataTable tr").each(function () {
 
-                        $('td', this).each(function () {
-                            $(this).find(":input").attr("disabled",true);
-                            $(this).find(":select-one").attr("disabled",true);
-                        })
+                     $('td', this).each(function () {
+                     $(this).find(":input").attr("disabled",true);
+                     $(this).find(":select-one").attr("disabled",true);
+                     })
 
+                     });*/
+                    //config BPS for variable analytics
+                    /*$.ajax({
+                        url:'/publisher/assets/process/apis/config_bps_for_var_analytics',
+                        type:'post',
+                        data:{
+                            'processVariables':JSON.stringify(processVariablesObjsArr),
+                            'processName': processName,
+                        },
+                       // success:
                     });*/
-                }else{
+                    $.ajax({
+                        url:'',
+                        type:'post',
+                        data:{
+                            'processVariables':JSON.stringify(processVariablesObjsArr),
+                            'processName': processName,
+                        },
+                        // success:
+                    });
+
+
+                } else {
                     alertify.error("Error in creating Event Stream/Reciever in DAS")
                 }
             },
