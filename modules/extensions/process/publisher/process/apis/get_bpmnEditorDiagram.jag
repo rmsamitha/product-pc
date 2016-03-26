@@ -17,18 +17,11 @@
  *  under the License.
  *
  */
-
 importPackage(org.wso2.carbon.pc.core);
 var log = new Log();
-if(log.isDebugEnabled()){
-    log.debug("INSIDE get process text...");
-}
 var ps = new ProcessStore();
-
-var processFlowchartPath = String(request.getParameter("flowchartPath"));
-if(log.isDebugEnabled()){
-    log.debug("Retrieving flowchart for: " + processFlowchartPath);
-}
-var flowchart = ps.getFlowchart(processFlowchartPath);
-print(flowchart);
+var bpmnEditorDiagramJson = String(request.getParameter("process_bpmnDesign_path"));
+var processid;
+processid = ps.getbpmnDesign(bpmnEditorDiagramJson);
+print(processid);
 %>

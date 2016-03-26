@@ -74,7 +74,7 @@ function showTextEditor(element) {
         $("#docView").hide();
         $("#pdfUploader").hide();
         $("#flowChartView").hide();
-
+        $("#bpmnEditor").hide();
         tinymce.init({
             selector: "#processContent"
         });
@@ -94,7 +94,7 @@ function associateBPMN(element) {
         $("#bpmnView").show();
         $("#pdfUploader").hide();
         $("#flowChartView").hide();
-
+        $("#bpmnEditor").hide();
     }
 }
 
@@ -110,6 +110,7 @@ function associateFlowChart(element) {
         $("#docView").hide();
         $("#bpmnView").hide();
         $("#processTextView").hide();
+        $("#bpmnEditor").hide();
     }
 }
 
@@ -125,6 +126,7 @@ function associateDocument(element) {
         $("#bpmnView").hide();
         $("#docView").show();
         $("#flowChartView").hide();
+        $("#bpmnEditor").hide();
     }
 }
 
@@ -138,7 +140,7 @@ function showMain() {
     $("#processTextView").hide();
     $("#pdfUploader").hide();
     $("#flowChartView").hide();
-
+    $("#bpmnEditor").hide();
 }
 
 function saveProcess(currentElement) {
@@ -155,7 +157,7 @@ function saveProcess(currentElement) {
                 $("#processTextOverviewLink").attr("href", "../../assets/process/details/" + response);
                 $("#bpmnOverviewLink").attr("href", "../../assets/process/details/" + response);
                 $("#pdfOverviewLink").attr("href", "../../assets/process/details/" + response);
-
+                $("#docOverviewLink").attr("href", "../../assets/process/details/" + response);
 
                 if ($(currentElement).attr('id') == 'saveProcessBtn') {
                     window.location = "../../assets/process/details/" + response;
@@ -364,20 +366,20 @@ function validateDocs() {
     $("#docProcessName").val($("#pName").val());
     $("#docProcessVersion").val($("#pVersion").val());
     if (document.getElementById('docName').value.length == 0) {
-        alert('Please enter doc name.');
+        alertify.error('Please enter doc name.');
         return false;
     } else if ((!document.getElementById('optionsRadios7').checked) && (!document.getElementById('optionsRadios8').checked)) {
-        alert('Please select a source.');
+        alertify.error('Please select a source.');
         return false;
     } else if (document.getElementById('optionsRadios7').checked) {
         if (document.getElementById('docUrl').value.length == 0) {
-            alert('Please give the doc url.');
+            alertify.error('Please give the doc url.');
             return false;
         }
     } else if (document.getElementById('optionsRadios8').checked) {
         var ext = $('#docLocation').val().split('.').pop().toLowerCase();
         if ($.inArray(ext, ['docx', 'doc']) == -1) {
-            alert('invalid extension!');
+            alertify.error('invalid extension!');
             return false;
         }
         $("#docExtension").val(ext);
@@ -397,6 +399,7 @@ function associatePdf(element) {
         $("#processTextView").hide();
         $("#bpmnView").hide();
         $("#docView").hide();
+        $("#bpmnEditor").hide();
         $("#pdfUploader").show();
     }
 }
@@ -457,4 +460,21 @@ function removeTag(currentElement) {
     if (index > -1) {
         tagList.splice(index, 1);
     }
+}
+
+function designBPMN(currentElement){
+    if ($("#pName").val() == "" || $("#pVersion").val() == "" || $("#pOwner").val() == "") {
+        alertify.error('please fill the required fields.');
+    } else {
+        //$('#create-view-header').text($('#pName').val());
+        saveProcess(currentElement);
+        //completeBPMNDetails();
+        $("#overviewDiv").hide();
+        $("#processTextView").hide();
+        $("#bpmnView").hide();
+        $("#bpmnEditor").show();
+        $("#flowChartView").hide();
+    }
+
+
 }

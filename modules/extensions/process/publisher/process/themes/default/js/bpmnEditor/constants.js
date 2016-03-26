@@ -1,6 +1,5 @@
-<%
 /*
- *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,18 +16,13 @@
  *  under the License.
  *
  */
-
-importPackage(org.wso2.carbon.pc.core);
-var log = new Log();
-if(log.isDebugEnabled()){
-    log.debug("INSIDE get process text...");
-}
-var ps = new ProcessStore();
-
-var processFlowchartPath = String(request.getParameter("flowchartPath"));
-if(log.isDebugEnabled()){
-    log.debug("Retrieving flowchart for: " + processFlowchartPath);
-}
-var flowchart = ps.getFlowchart(processFlowchartPath);
-print(flowchart);
-%>
+ processEditor.prototype.constants = {
+        selectedActivity: "selected",
+        connectClass: "connect-node",
+        activitiyGrouping: "activityGrouping",
+        bpmnModel: "bpmnModel",
+        activeEditId: "editing",
+        DELETE_KEY: 46,
+        ENTER_KEY: 13
+    }; 
+ 
