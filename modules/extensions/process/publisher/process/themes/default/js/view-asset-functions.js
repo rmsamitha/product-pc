@@ -285,25 +285,38 @@ function newDocFormToggle() {
 }
 
 function showAnalyticsConfigurer() {
+
     $("#overviewDiv").hide();
     $("#processTextContainer").hide();
     $("#processTextEditDiv").hide();
     $("#bpmnViewDiv").hide();
     $("#analyticsConfigDiv").show();
-    $('#eventStreamName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream");
-    $('#eventStreamName').attr("readonly", "true");
+    var hiddenElementIsDASConfiged = $('#hiddenElementIsDASConfiged').val();
 
-    $('#eventStreamVersion').val("1.0.0");
-    $('#eventStreamVersion').attr("readonly", "true");
+    //if($('#hiddenElementIsDASConfiged').val()=="true"){
+    if (hiddenElementIsDASConfiged == "true") {
+        $('#eventStreamName').attr("readonly", "false");
+        $('#eventStreamVersion').attr("readonly", "true");
+        $('#eventStreamDescription').attr("readonly", "true");
+        $('#eventStreamNickName').attr("readonly", "true");
+        $('#eventStreamNickName').attr("readonly", "true");
+        $('#eventReceiverName').attr("readonly", "true");
 
-    $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with DAS, for the process" + $('#view-header').text() + "_" + $('#process-version').text());
-    $('#eventStreamDescription').attr("readonly", "true");
+        $("#btn_save_analytics_configurations").attr("disabled", true);
+        $("#btn_addProcessVariablesRow").prop("onclick", null);
+        $("#btn_deleteProcessVariablesRow").prop("onclick", null);
 
-    $('#eventReceiverName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_receiver");
-    $('#eventReceiverName').attr("readonly", "true");
+        $('#updateDisabledMessage').text("Analytics Configuration cannot be editted once configured");
+        $('#updateDisabledMessage').css({color:'#00f'});
 
-    $('#eventStreamNickName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream"); //same as eventStreamName
-    $('#eventStreamNickName').attr("readonly", "true");
+        //here load the values for the other receiver/stream fields from registry or etc..
+    }else {
+        $('#eventStreamName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream");
+        $('#eventStreamVersion').val("1.0.0");
+        $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with DAS, for the process" + $('#view-header').text() + "_" + $('#process-version').text());
+        $('#eventStreamNickName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream"); //same as eventStreamName
+        $('#eventReceiverName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_receiver");
+    }
 }
 
 function editProcessOwner(e) {
@@ -1051,8 +1064,8 @@ function configAnalytics() {
         dasConfigData["eventReceiverName"] = eventReceiverName;
         dasConfigData["processVariables"] = processVariablesObjsArr;
 
-        var bpsConfigData={};
-       // bpsConfigData["processVariables"]=processVariablesObjsArr;
+        var bpsConfigData = {};
+        // bpsConfigData["processVariables"]=processVariablesObjsArr;
 
         var processName = $('#view-header').text();
         var processVersion = $('#process-version').text();
@@ -1068,39 +1081,58 @@ function configAnalytics() {
             success: function (DASconfigurationStatus) {
                 if (DASconfigurationStatus == "true") {
                     alertify.success("Analytics Configuration Success");
-                    showOverview(this);
-                    document.getElementById("btn_config_analytics").innerHTML = "View Analytics Configs";
                     $("#btn_save_analytics_configurations").attr("disabled", true);
-                    $("#btn_addProcessVariablesRow").attr("disabled", true);
-                    $("#btn_deleteProcessVariablesRow").attr("disabled", true);
-                    ///
-                    /*$("#dataTable tr").each(function () {
+                    $("#btn_addProcessVariablesRow").prop("onclick", null);
+                    $("#btn_deleteProcessVariablesRow").prop("onclick", null);
+                    $('#eventStreamName').attr('readonly', "true");
+                    $('#eventStreamVersion').attr("readonly", "true");
+                    $('#eventStreamDescription').attr("readonly", "true");
+                    $('#eventStreamNickName').attr("readonly", "true");
+                    $('#eventReceiverName').attr("readonly", "true");
 
+                    /*$("#dataTable tr").each(function () {
                      $('td', this).each(function () {
-                     $(this).find(":input").attr("disabled",true);
+                     $(this).find(":input").attr("disabled","true");
+                     $(this).find(":input").attr("readonly",true);
+
                      $(this).find(":select-one").attr("disabled",true);
                      })
 
                      });*/
-                    //config BPS for variable analytics
-                    /*$.ajax({
-                        url:'/publisher/assets/process/apis/config_bps_for_var_analytics',
-                        type:'post',
-                        data:{
-                            'processVariables':JSON.stringify(processVariablesObjsArr),
-                            'processName': processName,
-                        },
-                       // success:
-                    });*/
-                    $.ajax({
-                        url:'',
-                        type:'post',
-                        data:{
-                            'processVariables':JSON.stringify(processVariablesObjsArr),
-                            'processName': processName,
-                        },
-                        // success:
+
+                    $("#dataTable tr").each(function (){
+                        $(this).children().each(function () {
+                            $(this).find("input").attr("readonly", "true");
+                            $(this).find("select").attr("disabled", "true");
+
+                        });
                     });
+                    //window.location.reload(true);
+                    showOverview(this);
+                    document.getElementById("btn_config_analytics").innerHTML = "View Analytics Configs";
+                    $('#hiddenElementIsDASConfiged').val("true");
+
+                    ///
+                    /*/
+                     //config BPS for variable analytics
+                     /*$.ajax({
+                     url:'/publisher/assets/process/apis/config_bps_for_var_analytics',
+                     type:'post',
+                     data:{
+                     'processVariables':JSON.stringify(processVariablesObjsArr),
+                     'processName': processName,
+                     },
+                     // success:
+                     });*/
+                    /*$.ajax({
+                     url: '',
+                     type: 'post',
+                     data: {
+                     'processVariables': JSON.stringify(processVariablesObjsArr),
+                     'processName': processName,
+                     }
+                     // success:
+                     });*/
 
 
                 } else {

@@ -31,8 +31,7 @@
                     <!--<a href="../../bpmn/details/{{assets.tables.[1].fields.bpmnid.value}}">Show BPMN</a>-->
                 {{else}}
                     <button class="btn btn-primary" onclick="showBPMNUploader()">Associate a BPMN model</button>
-
-		        {{/if}}
+                {{/if}}
             </div>
 
             <div class="control-group" style="display: inline-block">
@@ -46,7 +45,6 @@
                     {{/if}}
                 {{/if}}
             </div>
-
             <div class="control-group" style="display: inline-block">
                 {{#if documentAvailable}}
                     <div id="sddiv"><button id="viewDocumentButton" class="btn btn-primary" onclick="showDocument()">View Document</button></div>
@@ -69,14 +67,13 @@
         {{#if bpmnDesignAvailable}}
             <div id="editordiv">
                 <button id="showBPMNDesign" class="btn btn-primary"
-                        >Edit BPMN Diagram</button>
+                >Edit BPMN Diagram</button>
             </div>
         {{else}}
             <div id="aFdiv"><button id="addbpmnDesign" class="btn btn-primary" onclick="associatebpmnDesignEditor('{{assets.tables.[0].fields.name.value}}')">Design BPMN</button></div>
         {{/if}}
     </div>
     <div class="control-group" style="display: inline-block">
-                
         <button id="pdfViewer" class="btn btn-primary" style="display: none" onclick="showPDF()">Show PDF</button>
         <button id="pdfUploader" class="btn btn-primary" style="display:none" onclick="associatePdf()">Associate PDF</button>
     </div>
@@ -207,9 +204,9 @@
 
 <div id="bpmnViewDiv" style="display: none">
     <button class="btn btn-primary" onclick="showOverview(this)"><span class="glyphicon glyphicon-circle-arrow-left"></span> Overview</button><br /><br />
-<div style="overflow:auto;width:1000px;height:500px;border:1px solid black;">
-    <img id="bpmnImage" src="data:image/png;base64,{{bpmn.bpmnImage}}"/>
-</div>
+    <div style="overflow:auto;width:1000px;height:500px;border:1px solid black;">
+        <img id="bpmnImage" src="data:image/png;base64,{{bpmn.bpmnImage}}"/>
+    </div>
 </div>
 
 <div id="bpmnEditDiv" style="display:none">
@@ -552,47 +549,39 @@
     </button>
     </br>
     </br>
-
     <h2 class="field-title">
         <a class="collapsing-h2" aria-expanded="true" href="#collapsevariableinfo" data-toggle="collapse">
             <i class="cu-btn-exp-col btn-collapsed">Process Variables to Config for Analysis</i>        </a>
     </h2>
 
-    {{#if DASAnalyticsConfigured}}
-        <div class="collapse in responsive-form-container" id="collapsevariableinfo">
+    <div class="collapse in responsive-form-container" id="collapsevariableinfo">
+        <div  class="add-unbounded-row" float="left" width="100%"  style="width:auto; float:left;"><a  id="btn_addProcessVariablesRow" onclick="addProcessVariableRow('dataTable')"><i
+                class="fa fa-plus-circle"></i> Add Process Variable</a></div>
+        <div class="add-unbounded-row" style="width:auto;padding-left: 25pt; margin-left:10%;"><a id="btn_deleteProcessVariablesRow" onclick="deleteProcessVariableRow('dataTable')"><i
+                class="fa fa-plus-circle"></i> Delete Process Variable</a></div>
+        <br>
 
-            <br>
-            <table id="dataTable"  border="1" width="25%">
-                <thead>
-                    <th>Variable Name</th>
-                    <th>Type</th>
-                </thead>
-               {{#each processVariableList.processVariables}}
+        <table id="dataTable"  border="1" width="25%">
+            <thead>
+            <th width="4%"></th>
+            <th>Variable Name</th>
+            <th>Type</th>
+            </thead>
+            {{#if DASAnalyticsConfigured}}
+                {{#each processVariableList.processVariables}}
                     <tr>
-                        <td style="display:table-cell; width:100%">{{this.name}}</td>
-                        <td style="display:table-cell; width:100%">{{this.type}}</td>
+                        <td><input type="checkbox" name="chk" disabled="true"/></td>
+                        <td><input type="text" name="txt" value="{{this.name}}" style="display:table-cell; width:100%" disabled="true"/></td>
+                        <td>
+                            <select name="country" style="display:table-cell; width:100%"  disabled="true">
+                                <option value="int">{{this.type}}</option>
+                            </select>
+                        </td>
                     </tr>
                 {{/each}}
-                </tr>
-            </table>
-        </div>
-    {{else}}
-        <div class="collapse in responsive-form-container" id="collapsevariableinfo">
-            <div  class="add-unbounded-row" float="left" width="100%"  style="width:auto; float:left;"><a  id="btn_addProcessVariablesRow" onclick="addProcessVariableRow('dataTable')"><i
-                    class="fa fa-plus-circle"></i> Add Process Variable</a></div>
-            <div class="add-unbounded-row" style="width:auto;padding-left: 25pt; margin-left:10%;"><a id="btn_deleteProcessVariablesRow" onclick="deleteProcessVariableRow('dataTable')"><i
-                    class="fa fa-plus-circle"></i> Delete Process Variable</a></div>
-
-            <br>
-            <table id="dataTable"  border="1" width="25%">
-                <thead>
-                    <th width="4%"></th>
-                    <th>Variable Name</th>
-                    <th>Type</th>
-                </thead>
+            {{else}}
                 <tr>
                     <td><input type="checkbox" name="chk"/></td>
-
                     <td><input type="text" name="txt" style="display:table-cell; width:100%"/></td>
                     <td>
                         <select name="country" style="display:table-cell; width:100%">
@@ -603,9 +592,9 @@
                         </select>
                     </td>
                 </tr>
-            </table>
-        </div>
-    {{/if}}
+            {{/if}}
+        </table>
+    </div>
 
     <h2 class="field-title">
         <a class="collapsing-h2" aria-expanded="true" href="#collapseEventStreamInfo" data-toggle="collapse">
@@ -642,7 +631,8 @@
 
     <h2 class="field-title">
         <a class="collapsing-h2" aria-expanded="true" href="#collapseEventReceiverInfo" data-toggle="collapse">
-            <i class="cu-btn-exp-col btn-collapsed">Event Receiver Information</i>        </a>
+            <i class="cu-btn-exp-col btn-collapsed">Event Receiver Information</i>
+        </a>
     </h2>
     <div class="collapse in responsive-form-container" id="collapseEventReceiverInfo">
         <form id="collapseEventReceiverInfoForm" class="form-horizontal">
@@ -660,10 +650,6 @@
             </div>
         </form>
     </div>
-    {{#if DASAnalyticsConfigured}}
-        <!--do nothing-->
-    {{else}}
-        <button id="btn_save_analytics_configurations" onclick="configAnalytics()" class="btn btn-primary">Save Configurations</button>
-
-    {{/if}}
+    <div><label   id="updateDisabledMessage"></label></div>
+    <button  id="btn_save_analytics_configurations" onclick="configAnalytics()" class="btn btn-primary">Save Configurations</button>
 </div>
