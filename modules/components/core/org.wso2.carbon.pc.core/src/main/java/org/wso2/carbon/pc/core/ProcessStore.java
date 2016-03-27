@@ -131,29 +131,6 @@ public class ProcessStore {
                 JSONObject processVariablesJOb = processInfo.getJSONObject("processVariables");
 
                 Iterator<?> keys = processVariablesJOb.keys();
-
-				/*//saving pracess variable name,type as element attributes
-                while (	keys.hasNext()){
-					String variableName = (String)keys.next();
-					//if (Debugger.isEnabled())
-						log.debug(variableName);
-					String variableType=processVariablesJOb.get(variableName).toString();
-					//JSONObject processVariableJOb= (JSONObject) processVariablesArray.get(i);
-					Element rootElement = doc.getDocumentElement();
-
-					Element variableElement=append(doc,rootElement,"processVariable",mns);
-					variableElement.setAttribute("name",variableName);
-					variableElement.setAttribute("type",variableType);
-					//variableElement.setNodeValue("My value");
-					//variableElement.setTextContent("My value 2");
-
-					//appendText(doc,rootElement,"name",mns,variableName);
-					//appendText(doc,rootElement,"type",mns,processVariablesJOb.get(variableName).toString());
-
-					String newProcessContent = xmlToString(doc);
-					resource.setContent(newProcessContent);
-					reg.put(processAssetPath, resource);
-				}*/
                 //saving pracess variable name,type as sub elements
                 while (keys.hasNext()) {
                     String variableName = (String) keys.next();
@@ -172,10 +149,11 @@ public class ProcessStore {
                 }
                 log.info("Saved process variables to configure analytics");
             }
-        } catch (TransformerException | JSONException e) {
+        } catch (TransformerException | JSONException | RegistryException e) {
             String errMsg = "Failed to save processVariables";
             log.error(errMsg, e);
             return  false;
+        }catch(Exception e){
         }
         return true;
     }

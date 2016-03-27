@@ -80,11 +80,12 @@ public class DASConfigClient {
         }
 
         // login to DAS as admin
+        String session=null;
         LoginAdminServiceClient login = null;
         try {
             login = new LoginAdminServiceClient(backEndUrl);
 
-            String session = login.authenticate("admin", "admin");
+            session = login.authenticate("admin", "admin");
         } catch (RemoteException e) {
             String errMsg = "Remote exception in login to DAS AuthenticationAdmin service";
             log.error(errMsg, e);
