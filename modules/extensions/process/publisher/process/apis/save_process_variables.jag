@@ -26,6 +26,12 @@ if (log.isDebugEnabled()) {
 
 var ps = new ProcessStore();
 var variableDetails = String(request.getParameter("processVariablesInfo"));
-var status = ps.saveProcessVariables(variableDetails);
-print(status);
+
+try {
+    ps.saveProcessVariables(variableDetails);
+    print(true);
+}catch(error){
+    log.error("Process Variable Saving Error for the variable info: "+variableDetails ,error);
+    print(false);
+}
 %>

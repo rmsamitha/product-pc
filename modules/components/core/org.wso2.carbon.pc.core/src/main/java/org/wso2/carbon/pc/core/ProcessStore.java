@@ -62,7 +62,7 @@ public class ProcessStore {
     private static final String mns = "http://www.wso2.org/governance/metadata";
     private static final String OK = "OK";
 
-    public String getProcessVariablesList(String resourcePath) {
+    public String getProcessVariablesList(String resourcePath) throws ProcessCenterException {
         String resourceString = "";
         try {
             RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
@@ -103,7 +103,7 @@ public class ProcessStore {
             }
         } catch (Exception e) {
             String errMsg = "Failed to get the process variables list";
-            log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg,e);
         }
         return resourceString;
     }
@@ -112,7 +112,8 @@ public class ProcessStore {
      * @param processVariableDetails
      * @return
      */
-    public boolean saveProcessVariables(String processVariableDetails) {
+    public void saveProcessVariables(String processVariableDetails) throws ProcessCenterException {
+        String processContent=null;
         try {
             RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
 
@@ -125,7 +126,7 @@ public class ProcessStore {
                 String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
                         processVersion;
                 Resource resource = reg.get(processAssetPath);
-                String processContent = new String((byte[]) resource.getContent());
+                processContent = new String((byte[]) resource.getContent());
                 Document doc = stringToXML(processContent);
 
                 JSONObject processVariablesJOb = processInfo.getJSONObject("processVariables");
@@ -150,12 +151,12 @@ public class ProcessStore {
                 log.info("Saved process variables to configure analytics");
             }
         } catch (TransformerException | JSONException | RegistryException e) {
-            String errMsg = "Failed to save processVariables";
-            log.error(errMsg, e);
-            return  false;
-        }catch(Exception e){
+            String errMsg = "Failed to save processVariables to the process.rxt with info:"+processVariableDetails;
+            throw new ProcessCenterException(errMsg,e);
+        } catch (Exception e) {
+            String errMsg="Failed to convert "+processContent+ " registry resource to XML";
+            throw new ProcessCenterException(errMsg,e);
         }
-        return true;
     }
 
     private Element append(Document doc, Element parent, String childName, String childNS) {

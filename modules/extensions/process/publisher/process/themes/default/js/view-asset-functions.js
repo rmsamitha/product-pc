@@ -1018,6 +1018,7 @@ function saveProcessVariables(tableID) {
         data: {'processVariablesInfo': JSON.stringify(processVariablesInfo)},
         error: function () {
             alertify.error('Process variables saving error');
+            return "ERROR";
         }
     });
 }
