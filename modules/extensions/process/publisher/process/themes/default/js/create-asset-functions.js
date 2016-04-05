@@ -23,6 +23,7 @@ var tagList = [];
 
 window.onload = function () {
     getProcessList();
+    getTagList();
 
     $('#span').click(function () {
         $("#tag-box").focus()
@@ -475,6 +476,26 @@ function designBPMN(currentElement){
         $("#bpmnEditor").show();
         $("#flowChartView").hide();
     }
+}
 
+function getTagList() {
+    $.ajax({
+        url: '/publisher/assets/process/apis/get_tag_list',
+        type: 'GET',
+        success: function (response) {
+            tagListObj = JSON.parse(response);
+            for (var i = 0; i < tagListObj.length; i++) {
+                tagList.push(tagListObj[i].processname + "-" + tagListObj[i].processversion);
+            }
+        },
+        error: function () {
+            alertify.error('Process List error');
+        }
+    });
+}
 
+function tagsAutoComplete() {
+    $(".tag-box").autocomplete({
+        source: tagList
+    });
 }

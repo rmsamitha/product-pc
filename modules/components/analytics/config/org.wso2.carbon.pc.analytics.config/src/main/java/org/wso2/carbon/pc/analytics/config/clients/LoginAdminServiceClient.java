@@ -27,27 +27,41 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException;
 import org.apache.axis2.context.ServiceContext;
+import org.wso2.carbon.pc.analytics.config.AnalyticsConfigConstants;
 
 import java.rmi.RemoteException;
 
 public class LoginAdminServiceClient {
-    private final String serviceName = "AuthenticationAdmin";
+    private final String serviceName = AnalyticsConfigConstants.AUTHENTICATION_ADMIN;
     private AuthenticationAdminStub authenticationAdminStub;
     private String endPoint;
     private static final Log log = LogFactory.getLog(LoginAdminServiceClient.class);
 
+    /**
+     *
+     * @param backEndUrl
+     * @throws AxisFault
+     */
     public LoginAdminServiceClient(String backEndUrl) throws AxisFault {
-        this.endPoint = backEndUrl + "/services/" + serviceName;
+        this.endPoint = backEndUrl + "/"+AnalyticsConfigConstants.SERVICES+"/" + serviceName;
         authenticationAdminStub = new AuthenticationAdminStub(endPoint);
     }
 
+    /**
+     *
+     * @param userName
+     * @param password
+     * @return
+     * @throws RemoteException
+     * @throws LoginAuthenticationExceptionException
+     */
     public String authenticate(String userName, String password)
             throws RemoteException, LoginAuthenticationExceptionException {
 
         String sessionCookie = null;
         if (authenticationAdminStub.login(userName, password, "localhost")) {
             if(log.isDebugEnabled()) {
-                log.debug("Login successful to DAS Admin Services");
+                log.debug("Login successful to DAS Admin Services.");
             }
             ServiceContext serviceContext = authenticationAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
@@ -56,8 +70,15 @@ public class LoginAdminServiceClient {
         return sessionCookie;
     }
 
+    /**
+     *
+     * @throws RemoteException
+     * @throws LogoutAuthenticationExceptionException
+     */
     public void logOut() throws RemoteException, LogoutAuthenticationExceptionException {
-        log.debug("Logout from DAS Admin Services");
         authenticationAdminStub.logout();
+        if(log.isDebugEnabled()) {
+            log.debug("Logout from DAS Admin Services");
+        }
     }
 }

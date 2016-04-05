@@ -32,6 +32,7 @@ import org.wso2.carbon.pc.analytics.config.clients.LoginAdminServiceClient;
 import org.wso2.carbon.pc.analytics.config.clients.ReceiverAdminServiceClient;
 import org.wso2.carbon.pc.analytics.config.clients.StreamAdminServiceClient;
 import org.wso2.carbon.pc.analytics.config.utils.DASConfigurationUtils;
+import org.wso2.carbon.pc.core.ProcessCenterException;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -46,97 +47,79 @@ public class DASConfigClient {
     String streamNickName;
     String receiverName;
     JSONArray processVariablesJObArr;
+    String backEndUrl = null;
     private static final Log log = LogFactory.getLog(DASConfigClient.class);
 
-    public boolean configDAS(String DASconfigDetails) {
+    public void configDAS(String DASconfigDetails)
+            throws ProcessCenterException, RemoteException, LogoutAuthenticationExceptionException {
 
-        log.info("Configuring WSO2 DAS for analytics of WSO2 PC...");//log process name,url
         JSONObject processInfo = null;
-        try {
-            processInfo = new JSONObject(DASconfigDetails);
-            streamName = processInfo.getString("eventStreamName");
-            stremaVersion = processInfo.getString("eventStreamVersion");
-            streamId = processInfo.getString("eventStreamId");
-            streamDescription = processInfo.getString("eventStreamDescription");
-            streamNickName = processInfo.getString("eventStreamNickName");
-            receiverName = processInfo.getString("eventReceiverName");
-            processVariablesJObArr = processInfo.getJSONArray("processVariables");
-        } catch (JSONException e) {
-            String errMsg = "Error in extracting data from JSON string";
-            log.error(errMsg, e);
-        }
-
-        System.setProperty("javax.net.ssl.trustStore",
-                "/home/samithac/wso2-products/wso2das-3.0.0-SNAPSHOT/repository/resources/security/wso2carbon.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
-        String backEndUrl = null;
+        LoginAdminServiceClient login = null;
+        String dasUsername="admin";
+        String dasPassword="admin";
         try {
             backEndUrl = DASConfigurationUtils.getURL();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        } catch (XMLStreamException e) {
-            log.error(e.getMessage());
-        }
 
-        // login to DAS as admin
-        String session=null;
-        LoginAdminServiceClient login = null;
-        try {
+
+            processInfo = new JSONObject(DASconfigDetails);
+            streamName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
+            stremaVersion = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_VERSION);
+            streamId = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_ID);
+            streamDescription = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_DESCRIPTION);
+            streamNickName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NICK_NAME);
+            receiverName = processInfo.getString(AnalyticsConfigConstants.EVENT_RECEIVER_NAME);
+            processVariablesJObArr = processInfo.getJSONArray(AnalyticsConfigConstants.PROCESS_VARIABLES);
+
+            System.setProperty("javax.net.ssl.trustStore",
+                    "/home/samithac/wso2-products/wso2das-3.0.1/repository/resources/security/wso2carbon.jks");
+            System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+            System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+
+            //login to DAS
             login = new LoginAdminServiceClient(backEndUrl);
+            String session = login.authenticate(dasUsername, dasPassword);
 
-            session = login.authenticate("admin", "admin");
-        } catch (RemoteException e) {
-            String errMsg = "Remote exception in login to DAS AuthenticationAdmin service";
-            log.error(errMsg, e);
-        } catch (LoginAuthenticationExceptionException e) {
-            String errMsg = "Authentication error in login to DAS AuthenticationAdmin service";
-            log.error(errMsg, e);
-        }
 
-        //create event stream
-        StreamAdminServiceClient streamAdminServiceClient = null;
-        try {
-            streamAdminServiceClient = new StreamAdminServiceClient(backEndUrl, session, streamName, stremaVersion,
+            //create event stream
+            StreamAdminServiceClient streamAdminServiceClient = new StreamAdminServiceClient(backEndUrl, session, streamName, stremaVersion,
                     streamId, streamNickName, streamDescription, processVariablesJObArr);
-        } catch (AxisFault axisFault) {
-            log.error(axisFault.getMessage());
-            return false;
-        }
-        boolean successCreateStream = streamAdminServiceClient.createEventStream();
-        if (!successCreateStream) {
-            try {
-                login.logOut();
-            } catch (RemoteException e) {
-                String errMsg = "Remote exception in login out from DAS AuthenticationAdmin service";
-                log.error(errMsg, e);
-            } catch (LogoutAuthenticationExceptionException e) {
-                String errMsg = "Authentication error in login out from DAS AuthenticationAdmin service";
-                log.error(errMsg, e);
-            }
-            return false;
-        }
-        log.info("Created the Event Stream: " + streamId + " in WSO2 DAS");
+            streamAdminServiceClient.createEventStream();
+            log.info("Created the Event Stream: " + streamId + " in WSO2 DAS on :"+backEndUrl);
 
-        //create event receiver
-        ReceiverAdminServiceClient receiverAdminServiceClient = null;
-        receiverAdminServiceClient = new ReceiverAdminServiceClient(backEndUrl, session, receiverName, streamId,
-                "wso2event");
-        boolean receiverConfigSuccess = receiverAdminServiceClient.deployEventReceiverConfiguration();
-        if (receiverConfigSuccess) {
-            log.debug("Created the Event Receiver: " + receiverName + "for the " + streamId + " in WSO2 DAS");
-        }
+            //create event receiver
+            ReceiverAdminServiceClient receiverAdminServiceClient = new ReceiverAdminServiceClient(backEndUrl, session, receiverName, streamId,
+                    AnalyticsConfigConstants.WSO2_EVENT);
+            receiverAdminServiceClient.deployEventReceiverConfiguration();
+            log.info("Created the Event Receiver: " + receiverName + "for the " + streamId + " in WSO2 DAS");
 
-        //logging out
-        try {
+            //logging out from DAS Admin Services
             login.logOut();
-        } catch (RemoteException e) {
-            String errMsg = "Remote exception in login out from DAS AuthenticationAdmin service";
+
+        }  catch(LoginAuthenticationExceptionException e){
+            String errMsg="Error in Login to DAS at :"+backEndUrl+ "trying to login with username:"+dasUsername+ "and password :"+dasPassword;
             log.error(errMsg, e);
-        } catch (LogoutAuthenticationExceptionException e) {
-            String errMsg = "Authentication error in login out from DAS AuthenticationAdmin service";
+            throw new ProcessCenterException(errMsg,e);
+        } catch(LogoutAuthenticationExceptionException e){
+            String errMsg="Error in Logout from DAS at :"+backEndUrl;
             log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg,e);
+        } catch (AxisFault |JSONException |XMLStreamException  e) {
+            String errMsg="Error in DAS configuration, using :"+DASconfigDetails;
+            log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg,e);
+        } catch (RemoteException  e) {
+            String errMsg="Error in DAS configuration, using :"+DASconfigDetails;
+            log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg,e);
+        } catch (IOException e) {
+            String errMsg="Error in DAS configuration, using :"+DASconfigDetails;
+            log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg,e);
+        }catch(ProcessCenterException e){
+            log.error(e.getMessage(), e);
+            throw new ProcessCenterException(e.getMessage(),e);
+        }finally {
+            login.logOut();
         }
-        return receiverConfigSuccess;
     }
 }

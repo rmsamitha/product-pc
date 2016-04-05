@@ -27,9 +27,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.pc.analytics.config.AnalyticsConfigConstants;
 import org.wso2.carbon.pc.analytics.config.stubs.EventStreamAdminServiceStub;
 import org.wso2.carbon.pc.analytics.config.stubs.EventStreamAdminServiceStub.AddEventStreamDefinitionAsString;
 import org.wso2.carbon.pc.analytics.config.stubs.EventStreamAdminServiceStub.AddEventStreamDefinitionAsStringResponse;
+import org.wso2.carbon.pc.core.ProcessCenterException;
 
 import java.rmi.RemoteException;
 
@@ -44,18 +46,19 @@ public class StreamAdminServiceClient {
 
     public StreamAdminServiceClient(String backEndUrl, String session, String streamName, String streamVersion,
             String streamId, String streamNickName, String streamDescription, JSONArray processVariablesJObArr)
-            throws AxisFault {
-        this.endPoint = backEndUrl + "/services/" + serviceName;
-        serviceAdminStub = new EventStreamAdminServiceStub(endPoint);
-
-        // Authenticate stub from sessionCooke
-        serviceClient = serviceAdminStub._getServiceClient();
-        option = serviceClient.getOptions();
-        option.setManageSession(true);
-        option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, session);
-
-        streamDefinitionJsonOb = new JSONObject();
+            throws ProcessCenterException {
         try {
+            this.endPoint = backEndUrl + "/"+ AnalyticsConfigConstants.SERVICES+"/" + serviceName;
+            serviceAdminStub = new EventStreamAdminServiceStub(endPoint);
+
+            // Authenticate stub from sessionCooke
+            serviceClient = serviceAdminStub._getServiceClient();
+            option = serviceClient.getOptions();
+            option.setManageSession(true);
+            option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, session);
+
+            streamDefinitionJsonOb = new JSONObject();
+
             streamDefinitionJsonOb.put("streamId", streamId);
             streamDefinitionJsonOb.put("name", streamName);
             streamDefinitionJsonOb.put("version", streamVersion);
@@ -67,32 +70,28 @@ public class StreamAdminServiceClient {
             streamDefinitionJsonOb.put("payloadData", processVariablesJObArr);
             log.debug(streamDefinitionJsonOb.toString());
         } catch (JSONException e) {
-            String errMsg = "Error in creating event stream Definition Json object";
-            log.error(errMsg, e);
+            String errMsg =
+                    "Error in creating event stream Definition Json object with data: " + backEndUrl + "," + session
+                            + "," + streamName + "," + streamVersion + "," + streamId + "," + streamNickName + ","
+                            + streamDescription + "," + processVariablesJObArr.toString();
+            throw new ProcessCenterException(errMsg, e);
+        } catch (AxisFault e) {
+            String errMsg = "Error in creating EventStreamAdminServiceStub object with endpoint :" + endPoint;
+            throw new ProcessCenterException(errMsg, e);
         }
     }
 
-    public boolean createEventStream() {
-
+    public void createEventStream() throws ProcessCenterException {
         AddEventStreamDefinitionAsString addEventStreamDefinitionAsString = new AddEventStreamDefinitionAsString();
-        AddEventStreamDefinitionAsStringResponse addEventStreamDefinitionAsStringResponse = null;
         //addEventStreamDefinitionAsString
         //		.setStreamStringDefinition("{ \"streamId\": \"streamId\",  			  \"name\": \"org.wso2.test1\",    			  \"version\": \"1.0.0\",    			  \"nickName\": \"TestStream\",    			  \"description\": \"Test Stream\", \"metaData\": [    {      \"name\": \"ip\",      \"type\": \"STRING\"    }  ],  \"correlationData\": [    {      \"name\": \"id\",      \"type\": \"LONG\"    }  ],  \"payloadData\": [    {      \"name\": \"testMessage\",    \"type\": \"STRING\"   }  ]}");
         addEventStreamDefinitionAsString.setStreamStringDefinition(streamDefinitionJsonOb.toString());
         try {
-            addEventStreamDefinitionAsStringResponse = serviceAdminStub
-                    .addEventStreamDefinitionAsString(addEventStreamDefinitionAsString);
+            serviceAdminStub.addEventStreamDefinitionAsString(addEventStreamDefinitionAsString);
         } catch (RemoteException e) {
-            String errMsg = "Error in creating event stream in DAS";
-            log.error(errMsg, e);
-            return false;
+            String errMsg = "Error in creating event stream in DAS with the StreamStringDefinition :"+streamDefinitionJsonOb.toString();
+            throw new ProcessCenterException(errMsg, e);
         }
-        /*try {
-            log.info("Created the Event Stream: "+streamDefinitionJsonOb.getString("name"));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}*/
-        return true;
     }
 
 }

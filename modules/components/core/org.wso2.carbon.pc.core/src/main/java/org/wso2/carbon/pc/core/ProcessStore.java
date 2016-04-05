@@ -62,6 +62,13 @@ public class ProcessStore {
     private static final String mns = "http://www.wso2.org/governance/metadata";
     private static final String OK = "OK";
 
+    /**
+     * Get a list of configured process variables and their types, for analytics
+     *
+     * @param resourcePath
+     * @return JSON Object in string representation, which includes the configured process variables for analytics
+     * @throws ProcessCenterException
+     */
     public String getProcessVariablesList(String resourcePath) throws ProcessCenterException {
         String resourceString = "";
         try {
@@ -109,6 +116,8 @@ public class ProcessStore {
     }
 
     /**
+     * Save the process variables in process rxt which need to be configured for analytics
+     *
      * @param processVariableDetails
      * @return
      */
@@ -121,9 +130,9 @@ public class ProcessStore {
                 UserRegistry reg = registryService.getGovernanceSystemRegistry();
 
                 JSONObject processInfo = new JSONObject(processVariableDetails);
-                String processName = processInfo.getString("processName");
-                String processVersion = processInfo.getString("processVersion");
-                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
+                String processName = processInfo.getString(ProcessStoreConstants.PROCESS_NAME);
+                String processVersion = processInfo.getString(ProcessStoreConstants.PROCESS_VERSION);
+                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT +processName + "/" +
                         processVersion;
                 Resource resource = reg.get(processAssetPath);
                 processContent = new String((byte[]) resource.getContent());
@@ -149,30 +158,36 @@ public class ProcessStore {
                     reg.put(processAssetPath, resource);
                 }
                 log.info("Saved process variables to configure analytics");
+                if(log.isDebugEnabled()){
+                    log.debug("Saved process variables to configure analytics.Saved info:"+processVariableDetails);
+                }
             }
         } catch (TransformerException | JSONException | RegistryException e) {
-            String errMsg = "Failed to save processVariables to the process.rxt with info:"+processVariableDetails;
+            String errMsg = "Failed to save processVariables with info,\n"+processVariableDetails+"\n,to the process.rxt";
+            log.error(errMsg, e);
             throw new ProcessCenterException(errMsg,e);
         } catch (Exception e) {
             String errMsg="Failed to convert "+processContent+ " registry resource to XML";
+            log.error(errMsg, e);
             throw new ProcessCenterException(errMsg,e);
         }
     }
 
-    private Element append(Document doc, Element parent, String childName, String childNS) {
+
+    public Element append(Document doc, Element parent, String childName, String childNS) {
         Element childElement = doc.createElementNS(childNS, childName);
         parent.appendChild(childElement);
         return childElement;
     }
 
-    private Element appendText(Document doc, Element parent, String childName, String childNS, String text) {
+    public Element appendText(Document doc, Element parent, String childName, String childNS, String text) {
         Element childElement = doc.createElementNS(childNS, childName);
         childElement.setTextContent(text);
         parent.appendChild(childElement);
         return childElement;
     }
 
-    private String xmlToString(Document doc) throws TransformerException {
+    public String xmlToString(Document doc) throws TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -182,7 +197,7 @@ public class ProcessStore {
         return output;
     }
 
-    private Document stringToXML(String xmlString) throws Exception {
+    public Document stringToXML(String xmlString) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
         builder = factory.newDocumentBuilder();

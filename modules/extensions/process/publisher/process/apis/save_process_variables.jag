@@ -29,9 +29,9 @@ var variableDetails = String(request.getParameter("processVariablesInfo"));
 
 try {
     ps.saveProcessVariables(variableDetails);
-    print(true);
-}catch(error){
-    log.error("Process Variable Saving Error for the variable info: "+variableDetails ,error);
-    print(false);
+    print("SUCCESS");
+}catch(errorE){
+    //log.erro
+    print("FAIL");
 }
 %>

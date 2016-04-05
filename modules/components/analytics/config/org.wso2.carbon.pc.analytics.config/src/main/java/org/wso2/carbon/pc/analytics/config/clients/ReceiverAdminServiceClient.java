@@ -17,12 +17,15 @@ package org.wso2.carbon.pc.analytics.config.clients;
 
 import java.rmi.RemoteException;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
 import org.wso2.carbon.event.receiver.stub.types.BasicInputAdapterPropertyDto;
+import org.wso2.carbon.pc.analytics.config.AnalyticsConfigConstants;
+import org.wso2.carbon.pc.core.ProcessCenterException;
 
 /**
  * Access DAS EventReceiverAdminService and creates the event receiver.
@@ -37,11 +40,9 @@ public class ReceiverAdminServiceClient {
     private static final Log log = LogFactory.getLog(ReceiverAdminServiceClient.class);
 
     public ReceiverAdminServiceClient(String backEndUrl, String sessionCookie, String receiverName, String streamId,
-            String wso2event) {
-        this.endPoint = backEndUrl + "/services/" + serviceName;
-        try {
-            eventReceiverAdminServiceStub = new EventReceiverAdminServiceStub(endPoint);
-
+            String wso2event) throws AxisFault {
+        this.endPoint = backEndUrl + "/" + AnalyticsConfigConstants.SERVICES + "/" + serviceName;
+        eventReceiverAdminServiceStub = new EventReceiverAdminServiceStub(endPoint);
         this.receiverName = receiverName;
         this.streamId = streamId;
 
@@ -54,14 +55,11 @@ public class ReceiverAdminServiceClient {
         option.setManageSession(true);
         option.setProperty(org.apache.axis2.transport.http.HTTPConstants.COOKIE_STRING, sessionCookie);
 
-        } catch (Exception e) {
-            String errMsg = "Error in connecting to DAS EventReceiverAdmin Service";
-            log.error(errMsg, e);
-        }
-
+        String errMsg = "Error in connecting to DAS EventReceiverAdmin Service using Session Cookie:" + sessionCookie
+                + ", DAS url:" + backEndUrl;
     }
 
-    public boolean deployEventReceiverConfiguration() {
+    public void deployEventReceiverConfiguration() throws ProcessCenterException {
         BasicInputAdapterPropertyDto props[] = new BasicInputAdapterPropertyDto[1];
         props[0] = new BasicInputAdapterPropertyDto();
         props[0].setKey("events.duplicated.in.cluster");
@@ -73,8 +71,7 @@ public class ReceiverAdminServiceClient {
         } catch (RemoteException e) {
             String errMsg = "Error in deploying event receiver";
             log.error(errMsg, e);
-            return false;
+            throw new ProcessCenterException(errMsg,e);
         }
-        return true;
     }
 }

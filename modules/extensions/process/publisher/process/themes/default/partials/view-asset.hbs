@@ -52,6 +52,13 @@
                     <div id="addiv"><button id="addDocumentButton" class="btn btn-primary" onclick="associateDoc()">Associate Document</button></div>
                 {{/if}}
             </div>
+            <div class="control-group" style="display: inline-block">
+                {{#if documentAvailable}}
+                    <div id="sddiv"><button id="viewDocumentButton" class="btn btn-primary" onclick="showDocument()">View Document</button></div>
+                {{else}}
+                    <div id="addiv"><button id="addDocumentButton" class="btn btn-primary" onclick="associateDoc()">Associate Document</button></div>
+                {{/if}}
+            </div>
             <div class="control-group" style="display: inline-block;">
                 {{#if flowchartAvailable}}
                     <div id="sfdiv">
@@ -561,19 +568,21 @@
                 class="fa fa-plus-circle"></i> Delete Process Variable</a></div>
         <br>
 
-        <table id="dataTable"  border="1" width="25%">
+        <table id="dataTable" class="tablex cu-data-tableX js-unbounded-table"  width="30%">
             <thead>
-            <th width="4%"></th>
-            <th>Variable Name</th>
-            <th>Type</th>
+                <tr>
+                    <th class="proc-var-th"></th>
+                    <th class="proc-var-th">Variable Name</th>
+                    <th class="proc-var-th">Type</th>
+                </tr>
             </thead>
             {{#if DASAnalyticsConfigured}}
                 {{#each processVariableList.processVariables}}
                     <tr>
-                        <td><input type="checkbox" name="chk" disabled="true"/></td>
-                        <td><input type="text" name="txt" value="{{this.name}}" style="display:table-cell; width:100%" disabled="true"/></td>
+                        <td type="checkbox" name="chk" disabled="true"/></td>
+                        <td><input style="display:table-cell; width:100%; padding-left: 8px;" type="text" name="txt" value="{{this.name}}" disabled="true"/></td>
                         <td>
-                            <select name="country" style="display:table-cell; width:100%"  disabled="true">
+                            <select name="country" style="display:table-cell; width:100%" disabled="true">
                                 <option value="int">{{this.type}}</option>
                             </select>
                         </td>
@@ -582,9 +591,9 @@
             {{else}}
                 <tr>
                     <td><input type="checkbox" name="chk"/></td>
-                    <td><input type="text" name="txt" style="display:table-cell; width:100%"/></td>
+                    <td><input style="display:table-cell; width:100%; padding-left: 8px;" type="text" name="txt"/></td>
                     <td>
-                        <select name="country" style="display:table-cell; width:100%">
+                        <select style="display:table-cell; width:100%" name="country">
                             <option value="int">int</option>
                             <option value="string">string</option>
                             <option value="float">float</option>

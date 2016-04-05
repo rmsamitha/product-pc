@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * <p>
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,16 @@ public class AnalyticsConfigConstants {
     public static final String CONFIG_USER_NAME = "bpsUsername";
     public static final String CONFIG_PASSWORD = "bpsPassword";
     public static final String SECRET_ALIAS = "PC.Analytics.Password";
+    public static final String EVENT_STREAM_NAME = "eventStreamName";
 
-
+    public static final String EVENT_STREAM_VERSION = "eventStreamVersion";
+    public static final String EVENT_STREAM_ID = "eventStreamId";
+    public static final String EVENT_STREAM_DESCRIPTION = "eventStreamDescription";
+    public static final String EVENT_STREAM_NICK_NAME = "eventStreamNickName";
+    public static final String EVENT_RECEIVER_NAME = "eventReceiverName";
+    public static final String PROCESS_VARIABLES = "processVariables";
+    public static final String WSO2_EVENT = "wso2event";
+    public static final String SERVICES = "services";
+    public static final String AUTHENTICATION_ADMIN="AuthenticationAdmin";
+    public static final String METADATA_NAMESPACE = "http://www.wso2.org/governance/metadata";
 }

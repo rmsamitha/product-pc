@@ -12,7 +12,7 @@
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
  *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.w   See the License for the
+ *  KIND, either express or implied. See the License for the
  *  specific language governing permissions and limitations
  *  under the License.
  *
@@ -24,11 +24,12 @@ var dasConfigClient = new DASConfigClient();
 var dasConfigData = String(request.getParameter("dasConfigData"));
 var processName = String(request.getParameter("processName"));
 var processVersion = String(request.getParameter("processVersion"));
-var configurationSuccess = dasConfigClient.configDAS(dasConfigData);
-
-if (configurationSuccess) {
+var configurationSuccess ;
+try{
+    dasConfigClient.configDAS(dasConfigData);
     DASConfigurationUtils.setPropertyDASAnalyticsConfigured(processName, processVersion);
+    print("SUCCESS");
+}catch(error){
+    print("FAIL");
 }
-
-print(configurationSuccess);
 %>

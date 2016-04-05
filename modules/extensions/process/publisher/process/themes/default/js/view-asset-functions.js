@@ -932,7 +932,7 @@ function addProcessVariableRow(tableID) {
         //'<div style="width:300px; display:table">'+
         '<td><input type="checkbox" name="chk"/></td>' +
 
-        '<td><input type="text" name="txt" style="display:table-cell; width:100%"/></td>' +
+        '<td><input type="text" name="txt" style="display:table-cell; width:100%; padding-left: 8px;" width:100%"/></td>' +
         '<td>' +
         '<select name="country" style="display:table-cell; width:100%">' +
         '<option value="int">int</option>' +
@@ -974,7 +974,7 @@ var processVariablesInfo = {};
 var processVariables = {};
 var processVariablesObjsArr = [];
 
-function saveProcessVariables(tableID) {
+function saveProcessVariables(tableID,callback) {
     var table = document.getElementById(tableID);
     var rowCount = table.rows.length;
 
@@ -1016,9 +1016,21 @@ function saveProcessVariables(tableID) {
         url: '/publisher/assets/process/apis/save_process_variables',
         type: 'POST',
         data: {'processVariablesInfo': JSON.stringify(processVariablesInfo)},
-        error: function () {
+        success: function (response) {
+            alertify.error(response);
+            if (response == "FAIL") {
+                alertify.error('Process variables saving error');
+                returnValue="ERROR";
+                callback(returnValue);
+            }else{
+                returnValue="SUCCESS";
+                callback(returnValue);
+            }
+        },
+        error: function (response) {
             alertify.error('Process variables saving error');
-            return "ERROR";
+            returnValue="ERROR";
+            callback1(returnValue);
         }
     });
 }
@@ -1040,14 +1052,16 @@ function configAnalytics() {
             alertify.error("Event Receiver Name Cannot be Empty");
             flagToReturn = true;
         }
-
         if (flagToReturn) {
             return;
         }
 
-        if (saveProcessVariables('dataTable') == "ERROR") {
-            return;
-        }
+        //var saveProcessVariableSuccess;
+        saveProcessVariables('dataTable',function(callbackVal){
+            if(callbackVal=="ERROR"){
+                return;
+            }
+        });
 
         var eventStreamName = $('#eventStreamName').val();
         var eventStreamVersion = $('#eventStreamVersion').val();
@@ -1079,8 +1093,8 @@ function configAnalytics() {
                 'processName': processName,
                 'processVersion': processVersion
             },
-            success: function (DASconfigurationStatus) {
-                if (DASconfigurationStatus == "true") {
+            success: function (response) {
+                if (response == "SUCCESS") {
                     alertify.success("Analytics Configuration Success");
                     $("#btn_save_analytics_configurations").attr("disabled", true);
                     $("#btn_addProcessVariablesRow").prop("onclick", null);
@@ -1091,21 +1105,10 @@ function configAnalytics() {
                     $('#eventStreamNickName').attr("readonly", "true");
                     $('#eventReceiverName').attr("readonly", "true");
 
-                    /*$("#dataTable tr").each(function () {
-                     $('td', this).each(function () {
-                     $(this).find(":input").attr("disabled","true");
-                     $(this).find(":input").attr("readonly",true);
-
-                     $(this).find(":select-one").attr("disabled",true);
-                     })
-
-                     });*/
-
                     $("#dataTable tr").each(function (){
                         $(this).children().each(function () {
                             $(this).find("input").attr("readonly", "true");
                             $(this).find("select").attr("disabled", "true");
-
                         });
                     });
                     //window.location.reload(true);
@@ -1141,7 +1144,7 @@ function configAnalytics() {
                 }
             },
             error: function () {
-                alertify.error('Error in calling jag file');
+                alertify.error('Error in config_das_analytics.jag while creating Event Stream/Reciever in DAS');
             }
         });
     }
