@@ -47,7 +47,7 @@ public class DASConfigClient {
     String streamNickName;
     String receiverName;
     JSONArray processVariablesJObArr;
-    String backEndUrl = null;
+    String DASUrl = null;
     private static final Log log = LogFactory.getLog(DASConfigClient.class);
 
     public void configDAS(String DASconfigDetails)
@@ -55,12 +55,12 @@ public class DASConfigClient {
 
         JSONObject processInfo = null;
         LoginAdminServiceClient login = null;
-        String dasUsername="admin";
-        String dasPassword="admin";
+        String dasUsername=null;
+        String dasPassword=null;
         try {
-            backEndUrl = DASConfigurationUtils.getURL();
-
-
+            dasUsername=DASConfigurationUtils.getDASUserName();
+            dasPassword=DASConfigurationUtils.getDASPassword();
+            DASUrl = DASConfigurationUtils.getDASURL();
             processInfo = new JSONObject(DASconfigDetails);
             streamName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
             stremaVersion = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_VERSION);
@@ -76,18 +76,18 @@ public class DASConfigClient {
             System.setProperty("javax.net.ssl.trustStoreType", "JKS");
 
             //login to DAS
-            login = new LoginAdminServiceClient(backEndUrl);
+            login = new LoginAdminServiceClient(DASUrl);
             String session = login.authenticate(dasUsername, dasPassword);
 
 
             //create event stream
-            StreamAdminServiceClient streamAdminServiceClient = new StreamAdminServiceClient(backEndUrl, session, streamName, stremaVersion,
+            StreamAdminServiceClient streamAdminServiceClient = new StreamAdminServiceClient(DASUrl, session, streamName, stremaVersion,
                     streamId, streamNickName, streamDescription, processVariablesJObArr);
             streamAdminServiceClient.createEventStream();
-            log.info("Created the Event Stream: " + streamId + " in WSO2 DAS on :"+backEndUrl);
+            log.info("Created the Event Stream: " + streamId + " in WSO2 DAS on :"+ DASUrl);
 
             //create event receiver
-            ReceiverAdminServiceClient receiverAdminServiceClient = new ReceiverAdminServiceClient(backEndUrl, session, receiverName, streamId,
+            ReceiverAdminServiceClient receiverAdminServiceClient = new ReceiverAdminServiceClient(DASUrl, session, receiverName, streamId,
                     AnalyticsConfigConstants.WSO2_EVENT);
             receiverAdminServiceClient.deployEventReceiverConfiguration();
             log.info("Created the Event Receiver: " + receiverName + "for the " + streamId + " in WSO2 DAS");
@@ -96,11 +96,11 @@ public class DASConfigClient {
             login.logOut();
 
         }  catch(LoginAuthenticationExceptionException e){
-            String errMsg="Error in Login to DAS at :"+backEndUrl+ "trying to login with username:"+dasUsername+ "and password :"+dasPassword;
+            String errMsg="Error in Login to DAS at :"+ DASUrl + "trying to login with username:"+dasUsername+ "and password :"+dasPassword;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg,e);
         } catch(LogoutAuthenticationExceptionException e){
-            String errMsg="Error in Logout from DAS at :"+backEndUrl;
+            String errMsg="Error in Logout from DAS at :"+ DASUrl;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg,e);
         } catch (AxisFault |JSONException |XMLStreamException  e) {

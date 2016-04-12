@@ -36,5 +36,8 @@ public class AnalyticsConfigConstants {
     public static final String WSO2_EVENT = "wso2event";
     public static final String SERVICES = "services";
     public static final String AUTHENTICATION_ADMIN="AuthenticationAdmin";
-    public static final String METADATA_NAMESPACE = "http://www.wso2.org/governance/metadata";
+    public static final String REQUEST_HEADER_BASIC= "Basic";
+    public static final String IS_DAS_CONFIGED_TAG= "isDasConfigedForAnalytics";
+    public static final String DAS_USER_NAME= "dasUsername";
+    public static final String DAS_PASSWORD= "dasPassword";
 }

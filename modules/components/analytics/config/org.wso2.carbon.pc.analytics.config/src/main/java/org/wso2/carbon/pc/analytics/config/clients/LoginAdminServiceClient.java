@@ -36,18 +36,20 @@ public class LoginAdminServiceClient {
     private AuthenticationAdminStub authenticationAdminStub;
     private String endPoint;
     private static final Log log = LogFactory.getLog(LoginAdminServiceClient.class);
+    private String dasURL=null;
 
     /**
-     *
-     * @param backEndUrl
+     * @param DASUrl
      * @throws AxisFault
      */
-    public LoginAdminServiceClient(String backEndUrl) throws AxisFault {
-        this.endPoint = backEndUrl + "/"+AnalyticsConfigConstants.SERVICES+"/" + serviceName;
+    public LoginAdminServiceClient(String DASUrl) throws AxisFault {
+        this.dasURL=DASUrl;
+        this.endPoint = DASUrl + "/"+AnalyticsConfigConstants.SERVICES+"/" + serviceName;
         authenticationAdminStub = new AuthenticationAdminStub(endPoint);
     }
 
     /**
+     * Authenticate DAS login
      *
      * @param userName
      * @param password
@@ -59,7 +61,9 @@ public class LoginAdminServiceClient {
             throws RemoteException, LoginAuthenticationExceptionException {
 
         String sessionCookie = null;
-        if (authenticationAdminStub.login(userName, password, "localhost")) {
+        String dasHostName=dasURL.substring(dasURL.indexOf("/")+2)
+                .substring(0,dasURL.substring(dasURL.indexOf("/")+2).indexOf(":"));
+        if (authenticationAdminStub.login(userName, password, dasHostName)) {
             if(log.isDebugEnabled()) {
                 log.debug("Login successful to DAS Admin Services.");
             }
@@ -71,6 +75,7 @@ public class LoginAdminServiceClient {
     }
 
     /**
+     * Logout from DAS Admin Services
      *
      * @throws RemoteException
      * @throws LogoutAuthenticationExceptionException

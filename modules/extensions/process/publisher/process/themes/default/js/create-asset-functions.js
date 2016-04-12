@@ -489,7 +489,7 @@ function getTagList() {
             }
         },
         error: function () {
-            alertify.error('Process List error');
+            alertify.error('Tag List error');
         }
     });
 }

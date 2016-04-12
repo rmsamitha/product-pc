@@ -31,7 +31,6 @@ try {
     ps.saveProcessVariables(variableDetails);
     print("SUCCESS");
 }catch(errorE){
-    //log.erro
     print("FAIL");
 }
 %>

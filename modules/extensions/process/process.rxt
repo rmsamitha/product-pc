@@ -47,6 +47,9 @@
             <field type="text" required="false">
                 <name>server</name>
             </field>
+            <field type="text" required="false">
+                <name>isDasConfigedForAnalytics</name>
+            </field>
         </table>
         <table name="Subprocess" maxoccurs="unbounded">
             <field type="text" required="true">

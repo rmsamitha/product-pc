@@ -21,19 +21,13 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.pc.analytics.config.AnalyticsConfigConstants;
 import org.wso2.carbon.pc.core.ProcessCenterException;
 import org.wso2.carbon.pc.core.ProcessStoreConstants;
 import org.wso2.carbon.pc.core.internal.ProcessCenterServerHolder;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -46,7 +40,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+
 import org.wso2.carbon.pc.core.ProcessStore;
 
 /**
@@ -55,91 +49,99 @@ import org.wso2.carbon.pc.core.ProcessStore;
 public class DASConfigurationUtils {
     private static final Log log = LogFactory.getLog(DASConfigurationUtils.class);
 
-    /*public static void setPropertyDASAnalyticsConfigured(String processName, String processVersion) {
-        PrivilegedCarbonContext context = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        Registry registry = context.getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-        Resource resource;
-        String processAssetPath = "processes/" + processName + "/" + processVersion;
-
-        try {
-            if (registry.resourceExists(processAssetPath)) {
-                resource = registry.get(processAssetPath);
-                if (resource.getProperty("isDASConfiguredForAnalytics") == null) {
-                    resource.addProperty("isDASConfiguredForAnalytics", "true");
-                    registry.put(processAssetPath, resource);
-                }
-            }
-        } catch (RegistryException e) {
-            log.error("Error working with SYSTEM_GOVERNANCE registry property -isDASConfiguredForAnalytics");
-        }
-    }*/
-
-    public static boolean isDASAnalyticsConfigured(String processName, String processVersion) {
-        PrivilegedCarbonContext context = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        Registry registry = context.getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-        Resource resource;
-        String processAssetPath = "processes/" + processName + "/" + processVersion;
-
-        try {
-            if (registry.resourceExists(processAssetPath)) {
-                resource = registry.get(processAssetPath);
-                return Boolean.parseBoolean(resource.getProperty("isDASConfiguredForAnalytics"));
-            } else {
-                return false;
-            }
-        } catch (RegistryException e) {
-            log.error("Error in getting SYSTEM_GOVERNANCE registry property- isDASConfiguredForAnalytics ");
-        }
-        return true;
-    }
-
-    public static void setPropertyDASAnalyticsConfigured(String processName, String processVersion) throws ProcessCenterException {
-        String processContent=null;
-        ProcessStore ps=new ProcessStore();
+    /**
+     * Check whether analytics configurations (with DAS) is made for the respective process
+     *
+     * @param processName
+     * @param processVersion
+     * @return isDASAnalyticsConfigured
+     * @throws ProcessCenterException
+     */
+    public static boolean isDASAnalyticsConfigured(String processName, String processVersion)
+            throws ProcessCenterException {
+        String processContent = null;
+        ProcessStore ps = new ProcessStore();
         try {
             RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
-
             if (registryService != null) {
                 UserRegistry reg = registryService.getGovernanceSystemRegistry();
-
-                //JSONObject processInfo = new JSONObject(processVariableDetails);
-                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT +processName + "/" +
+                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
                         processVersion;
                 org.wso2.carbon.registry.core.Resource resource = reg.get(processAssetPath);
                 processContent = new String((byte[]) resource.getContent());
                 Document doc = ps.stringToXML(processContent);
 
-                //JSONObject processVariablesJOb = processInfo.getJSONObject("processVariables");
+                Element rootElement = doc.getDocumentElement();
+                Element propertiesElement = (Element) rootElement.getElementsByTagName("properties").item(0);
 
-                //Iterator<?> keys = processVariablesJOb.keys();
-                //saving pracess variable name,type as sub elements
-                //while (keys.hasNext()) {
-                    //String variableName = (String) keys.next();
-                    //if (Debugger.isEnabled())
-                    //log.debug(variableName);
-                    //String variableType = processVariablesJOb.get(variableName).toString();
-                    //JSONObject processVariableJOb= (JSONObject) processVariablesArray.get(i);
-                    Element rootElement = doc.getDocumentElement();
-                    Element propertiesElement = ps.append(doc, rootElement, "properties", AnalyticsConfigConstants.METADATA_NAMESPACE);
-                    ps.appendText(doc, propertiesElement, "isDASAnalyticsConfigured", AnalyticsConfigConstants.METADATA_NAMESPACE, "true");
+                if (propertiesElement.getElementsByTagName(AnalyticsConfigConstants.IS_DAS_CONFIGED_TAG).getLength() > 0
+                        && propertiesElement.getElementsByTagName(AnalyticsConfigConstants.IS_DAS_CONFIGED_TAG).item(0)
+                        .getTextContent().equals("true")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (RegistryException e) {
+            String errMsg = "Governance Registry access error, wile checking isDasConfigedForAnalytics";
+            throw new ProcessCenterException(errMsg, e);
+        } catch (Exception e) {
+            String errMsg = "Registry process.rxt String to XML conversion error, wile checking isDasConfigedForAnalytics ";
+            throw new ProcessCenterException(errMsg, e);
+        }
+        return false;
+    }
+
+    /**
+     * Set the Property isDasConfigedForAnalytics in the process related .rxt to flag that analytics configurations (with DAS) is made for the respective process
+     *
+     * @param processName
+     * @param processVersion
+     * @throws ProcessCenterException
+     */
+    public static void setPropertyDASAnalyticsConfigured(String processName, String processVersion)
+            throws ProcessCenterException {
+        String processContent = null;
+        ProcessStore ps = new ProcessStore();
+        try {
+            RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
+            if (registryService != null) {
+                UserRegistry reg = registryService.getGovernanceSystemRegistry();
+                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
+                        processVersion;
+                org.wso2.carbon.registry.core.Resource resource = reg.get(processAssetPath);
+                processContent = new String((byte[]) resource.getContent());
+                Document doc = ps.stringToXML(processContent);
+
+                Element rootElement = doc.getDocumentElement();
+                Element propertiesElement = (Element) rootElement.getElementsByTagName("properties").item(0);
+
+                //add a new property item element if it is not existing already
+                if (propertiesElement.getElementsByTagName(AnalyticsConfigConstants.IS_DAS_CONFIGED_TAG).getLength()
+                        == 0) {
+                    ps.appendText(doc, propertiesElement, AnalyticsConfigConstants.IS_DAS_CONFIGED_TAG,
+                            ProcessStoreConstants.MNS, "true");
 
                     String newProcessContent = ps.xmlToString(doc);
                     resource.setContent(newProcessContent);
                     reg.put(processAssetPath, resource);
-                //}
-                if(log.isDebugEnabled()){
-                    log.debug("Successfully set the property isDASAnalyticsConfigured true.");
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("isDasConfigedForAnalytics property in process.rxt set as true");
+                    }
                 }
             }
-        } catch (TransformerException | JSONException | org.wso2.carbon.registry.core.exceptions.RegistryException e) {
-            /* add this again and resolve compile errors later
-            String errMsg = "Failed to save processVariables with info,\n"+processVariableDetails+"\n,to the process.rxt";
+        } catch (TransformerException | RegistryException e) {
+            String errMsg = "Exception in setting property isDASAnalyticsConfigured in process.rxt for the process:"
+                    + processName + ":" + processVersion;
             log.error(errMsg, e);
-            throw new ProcessCenterException(errMsg,e);*/
+            throw new ProcessCenterException(errMsg, e);
         } catch (Exception e) {
-            String errMsg="Failed to convert "+processContent+ " registry resource to XML";
+            String errMsg =
+                    "Exception in setting property isDASAnalyticsConfigured in process.rxt while converting xml to string for the process:"
+                            + processName + ":" + processVersion;
             log.error(errMsg, e);
-            throw new ProcessCenterException(errMsg,e);
+            throw new ProcessCenterException(errMsg, e);
         }
     }
 
@@ -159,7 +161,12 @@ public class DASConfigurationUtils {
         return AXIOMUtil.stringToOM(configContent);
     }
 
-    public static String getURL() throws IOException, XMLStreamException {
+    /**
+     * @return DASUrl
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public static String getDASURL() throws IOException, XMLStreamException {
         OMElement configElement = getConfigElement();
         OMElement analyticsElement = configElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
         if (analyticsElement != null) {
@@ -176,8 +183,12 @@ public class DASConfigurationUtils {
         return null;
     }
 
+    /**
+     * @return AuthorizationHeader
+     * @throws IOException
+     * @throws XMLStreamException
+     */
     public static String getAuthorizationHeader() throws IOException, XMLStreamException {
-        String requestHeader = "Basic ";
         OMElement configElement = getConfigElement();
         SecretResolver secretResolver = SecretResolverFactory.create(configElement, false);
         OMElement analyticsElement = configElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
@@ -203,8 +214,54 @@ public class DASConfigurationUtils {
             String headerPortion = userName + ":" + password;
             byte[] encodedBytes = headerPortion.getBytes("UTF-8");
             String encodedString = DatatypeConverter.printBase64Binary(encodedBytes);
-            requestHeader += encodedString;
-            return requestHeader;
+            //requestHeader += encodedString;
+            return AnalyticsConfigConstants.REQUEST_HEADER_BASIC + encodedString;
+        }
+        return null;
+    }
+
+    /**
+     * Get DAS user name
+     *
+     * @return dasUserName
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public static String getDASUserName() throws IOException, XMLStreamException {
+        OMElement configElement = getConfigElement();
+        OMElement analyticsElement = configElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
+        if (analyticsElement != null) {
+            String dasUserName = analyticsElement
+                    .getFirstChildWithName(new QName(AnalyticsConfigConstants.DAS_USER_NAME)).getText();
+            if (dasUserName != null && !dasUserName.isEmpty()) {
+                if (dasUserName.endsWith(File.separator)) {
+                    return dasUserName.substring(0, dasUserName.length() - 1);
+                }
+                return dasUserName;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get DAS Password
+     *
+     * @return dasPassword
+     * @throws IOException
+     * @throws XMLStreamException
+     */
+    public static String getDASPassword() throws IOException, XMLStreamException {
+        OMElement configElement = getConfigElement();
+        OMElement analyticsElement = configElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
+        if (analyticsElement != null) {
+            String dasPassword = analyticsElement
+                    .getFirstChildWithName(new QName(AnalyticsConfigConstants.DAS_PASSWORD)).getText();
+            if (dasPassword != null && !dasPassword.isEmpty()) {
+                if (dasPassword.endsWith(File.separator)) {
+                    return dasPassword.substring(0, dasPassword.length() - 1);
+                }
+                return dasPassword;
+            }
         }
         return null;
     }

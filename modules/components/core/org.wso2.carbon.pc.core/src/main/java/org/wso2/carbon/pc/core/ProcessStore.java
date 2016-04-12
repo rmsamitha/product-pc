@@ -59,7 +59,7 @@ import java.util.zip.ZipInputStream;
 public class ProcessStore {
     private static final Log log = LogFactory.getLog(ProcessStore.class);
 
-    private static final String mns = "http://www.wso2.org/governance/metadata";
+    //private static final String mns = "http://www.wso2.org/governance/metadata";
     private static final String OK = "OK";
 
     /**
@@ -149,9 +149,9 @@ public class ProcessStore {
                     String variableType = processVariablesJOb.get(variableName).toString();
                     //JSONObject processVariableJOb= (JSONObject) processVariablesArray.get(i);
                     Element rootElement = doc.getDocumentElement();
-                    Element variableElement = append(doc, rootElement, "process_variable", mns);
-                    appendText(doc, variableElement, "name", mns, variableName);
-                    appendText(doc, variableElement, "type", mns, variableType);
+                    Element variableElement = append(doc, rootElement, "process_variable", ProcessStoreConstants.MNS);
+                    appendText(doc, variableElement, "name", ProcessStoreConstants.MNS, variableName);
+                    appendText(doc, variableElement, "type", ProcessStoreConstants.MNS, variableType);
 
                     String newProcessContent = xmlToString(doc);
                     resource.setContent(newProcessContent);
@@ -401,15 +401,15 @@ public class ProcessStore {
                             }
                             String bpmnAssetPath = "bpmn/" + entryName + "/" + version;
                             Document bpmnDoc = docBuilder.newDocument();
-                            Element bpmnRoot = bpmnDoc.createElementNS(mns, "metadata");
+                            Element bpmnRoot = bpmnDoc.createElementNS(ProcessStoreConstants.MNS, "metadata");
                             bpmnDoc.appendChild(bpmnRoot);
-                            Element bpmnOverview = append(bpmnDoc, bpmnRoot, "overview", mns);
-                            appendText(bpmnDoc, bpmnOverview, "name", mns, displayName);
-                            appendText(bpmnDoc, bpmnOverview, "version", mns, version);
-                            appendText(bpmnDoc, bpmnOverview, "processpath", mns, "");
-                            appendText(bpmnDoc, bpmnOverview, "description", mns, "");
-                            Element bpmnAssetContentElement = append(bpmnDoc, bpmnRoot, "content", mns);
-                            appendText(bpmnDoc, bpmnAssetContentElement, "contentpath", mns, bpmnResourcePath);
+                            Element bpmnOverview = append(bpmnDoc, bpmnRoot, "overview", ProcessStoreConstants.MNS);
+                            appendText(bpmnDoc, bpmnOverview, "name", ProcessStoreConstants.MNS, displayName);
+                            appendText(bpmnDoc, bpmnOverview, "version", ProcessStoreConstants.MNS, version);
+                            appendText(bpmnDoc, bpmnOverview, "processpath", ProcessStoreConstants.MNS, "");
+                            appendText(bpmnDoc, bpmnOverview, "description", ProcessStoreConstants.MNS, "");
+                            Element bpmnAssetContentElement = append(bpmnDoc, bpmnRoot, "content", ProcessStoreConstants.MNS);
+                            appendText(bpmnDoc, bpmnAssetContentElement, "contentpath", ProcessStoreConstants.MNS, bpmnResourcePath);
                             String bpmnAssetContent = xmlToString(bpmnDoc);
 
                             Resource bpmnAsset = reg.newResource();
@@ -987,10 +987,10 @@ public class ProcessStore {
 
                 if (subprocess != null) {
                     Element rootElement = doc.getDocumentElement();
-                    Element subprocessElement = append(doc, rootElement, "subprocess", mns);
-                    appendText(doc, subprocessElement, "name", mns, subprocess.getString("name"));
-                    appendText(doc, subprocessElement, "path", mns, subprocess.getString("path"));
-                    appendText(doc, subprocessElement, "id", mns, subprocess.getString("id"));
+                    Element subprocessElement = append(doc, rootElement, "subprocess", ProcessStoreConstants.MNS);
+                    appendText(doc, subprocessElement, "name", ProcessStoreConstants.MNS, subprocess.getString("name"));
+                    appendText(doc, subprocessElement, "path", ProcessStoreConstants.MNS, subprocess.getString("path"));
+                    appendText(doc, subprocessElement, "id", ProcessStoreConstants.MNS, subprocess.getString("id"));
 
                     String newProcessContent = xmlToString(doc);
                     resource.setContent(newProcessContent);
@@ -1024,10 +1024,10 @@ public class ProcessStore {
 
                 if (successor != null) {
                     Element rootElement = doc.getDocumentElement();
-                    Element successorElement = append(doc, rootElement, "successor", mns);
-                    appendText(doc, successorElement, "name", mns, successor.getString("name"));
-                    appendText(doc, successorElement, "path", mns, successor.getString("path"));
-                    appendText(doc, successorElement, "id", mns, successor.getString("id"));
+                    Element successorElement = append(doc, rootElement, "successor", ProcessStoreConstants.MNS);
+                    appendText(doc, successorElement, "name", ProcessStoreConstants.MNS, successor.getString("name"));
+                    appendText(doc, successorElement, "path", ProcessStoreConstants.MNS, successor.getString("path"));
+                    appendText(doc, successorElement, "id", ProcessStoreConstants.MNS, successor.getString("id"));
 
                     String newProcessContent = xmlToString(doc);
                     resource.setContent(newProcessContent);
@@ -1061,10 +1061,10 @@ public class ProcessStore {
 
                 if (predecessor != null) {
                     Element rootElement = doc.getDocumentElement();
-                    Element predecessorElement = append(doc, rootElement, "predecessor", mns);
-                    appendText(doc, predecessorElement, "name", mns, predecessor.getString("name"));
-                    appendText(doc, predecessorElement, "path", mns, predecessor.getString("path"));
-                    appendText(doc, predecessorElement, "id", mns, predecessor.getString("id"));
+                    Element predecessorElement = append(doc, rootElement, "predecessor", ProcessStoreConstants.MNS);
+                    appendText(doc, predecessorElement, "name", ProcessStoreConstants.MNS, predecessor.getString("name"));
+                    appendText(doc, predecessorElement, "path", ProcessStoreConstants.MNS, predecessor.getString("path"));
+                    appendText(doc, predecessorElement, "id", ProcessStoreConstants.MNS, predecessor.getString("id"));
 
                     String newProcessContent = xmlToString(doc);
                     resource.setContent(newProcessContent);

@@ -1017,7 +1017,6 @@ function saveProcessVariables(tableID,callback) {
         type: 'POST',
         data: {'processVariablesInfo': JSON.stringify(processVariablesInfo)},
         success: function (response) {
-            alertify.error(response);
             if (response == "FAIL") {
                 alertify.error('Process variables saving error');
                 returnValue="ERROR";

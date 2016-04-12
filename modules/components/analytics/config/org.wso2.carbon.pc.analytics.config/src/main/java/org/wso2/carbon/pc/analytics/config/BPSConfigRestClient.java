@@ -28,7 +28,7 @@ public class BPSConfigRestClient {
      * @return the result as a String
      */
     public static String post(String message) throws IOException, XMLStreamException {
-        String url=DASConfigurationUtils.getURL();
+        String url=DASConfigurationUtils.getDASURL();
         RegistryUtils.setTrustStoreSystemProperties();
         HttpClient httpClient = new HttpClient();
         PostMethod postRequest = new PostMethod(url);

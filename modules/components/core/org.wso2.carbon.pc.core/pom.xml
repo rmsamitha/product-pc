@@ -46,11 +46,8 @@
                     <instructions>
                         <Bundle-Vendor>WSO2</Bundle-Vendor>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Private-Package>
-                            org.wso2.carbon.pc.core.internal
-                        </Private-Package>
                         <Export-Package>
-                            !org.wso2.carbon.pc.core.internal,
+                            org.wso2.carbon.pc.core.internal,
                             org.wso2.carbon.pc.core;version=${project.version}
                         </Export-Package>
                         <Import-Package>
