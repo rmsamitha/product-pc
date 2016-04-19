@@ -37,6 +37,7 @@ import org.wso2.carbon.pc.core.ProcessCenterException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 
 public class DASConfigClient {
 
@@ -56,10 +57,13 @@ public class DASConfigClient {
         JSONObject processInfo = null;
         LoginAdminServiceClient login = null;
         String dasUsername=null;
-        String dasPassword=null;
+        //String dasPassword=null;
+        char[] dasPassword=null;
+
         try {
             dasUsername=DASConfigurationUtils.getDASUserName();
-            dasPassword=DASConfigurationUtils.getDASPassword();
+            //dasPassword=DASConfigurationUtils.getDASPassword();
+            dasPassword=DASConfigurationUtils.getDASPassword().toCharArray();
             DASUrl = DASConfigurationUtils.getDASURL();
             processInfo = new JSONObject(DASconfigDetails);
             streamName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
@@ -79,6 +83,9 @@ public class DASConfigClient {
             login = new LoginAdminServiceClient(DASUrl);
             String session = login.authenticate(dasUsername, dasPassword);
 
+            //remove the password from memory
+            Arrays.fill(dasPassword,' ');
+            dasPassword=null;
 
             //create event stream
             StreamAdminServiceClient streamAdminServiceClient = new StreamAdminServiceClient(DASUrl, session, streamName, stremaVersion,
@@ -115,9 +122,9 @@ public class DASConfigClient {
             String errMsg="Error in DAS configuration, using :"+DASconfigDetails;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg,e);
-        }catch(ProcessCenterException e){
+        }catch(ProcessCenterException e) {
             log.error(e.getMessage(), e);
-            throw new ProcessCenterException(e.getMessage(),e);
+            throw new ProcessCenterException(e.getMessage(), e);
         }finally {
             login.logOut();
         }

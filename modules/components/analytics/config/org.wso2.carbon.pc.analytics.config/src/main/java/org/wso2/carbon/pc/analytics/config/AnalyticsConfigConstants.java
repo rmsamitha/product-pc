@@ -40,4 +40,5 @@ public class AnalyticsConfigConstants {
     public static final String IS_DAS_CONFIGED_TAG= "isDasConfigedForAnalytics";
     public static final String DAS_USER_NAME= "dasUsername";
     public static final String DAS_PASSWORD= "dasPassword";
+    public static final String EVENT_STREAM_ADMIN_SERVICE_NAME= "EventStreamAdminService";
 }

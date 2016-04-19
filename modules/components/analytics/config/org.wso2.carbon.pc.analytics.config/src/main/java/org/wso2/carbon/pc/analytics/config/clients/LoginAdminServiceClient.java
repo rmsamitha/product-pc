@@ -30,6 +30,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.wso2.carbon.pc.analytics.config.AnalyticsConfigConstants;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
 
 public class LoginAdminServiceClient {
     private final String serviceName = AnalyticsConfigConstants.AUTHENTICATION_ADMIN;
@@ -57,13 +58,15 @@ public class LoginAdminServiceClient {
      * @throws RemoteException
      * @throws LoginAuthenticationExceptionException
      */
-    public String authenticate(String userName, String password)
+    public String authenticate(String userName, char[] password)
             throws RemoteException, LoginAuthenticationExceptionException {
 
         String sessionCookie = null;
         String dasHostName=dasURL.substring(dasURL.indexOf("/")+2)
                 .substring(0,dasURL.substring(dasURL.indexOf("/")+2).indexOf(":"));
-        if (authenticationAdminStub.login(userName, password, dasHostName)) {
+        if (authenticationAdminStub.login(userName, String.valueOf(password), dasHostName)) {
+            Arrays.fill(password,' ');
+            password=null;
             if(log.isDebugEnabled()) {
                 log.debug("Login successful to DAS Admin Services.");
             }

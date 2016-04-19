@@ -81,16 +81,19 @@
             <artifactId>org.wso2.carbon.authenticator.stub</artifactId>
             <version>${org.wso2.carbon.authenticator.stub.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2-client</artifactId>
             <version>1.6.1.wso2v5</version>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.receiver.stub</artifactId>
+            <version>5.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics-common</groupId>
+            <artifactId>org.wso2.carbon.event.stream.stub</artifactId>
             <version>5.0.8</version>
         </dependency>
         <dependency>
