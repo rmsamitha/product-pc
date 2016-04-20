@@ -19,13 +19,15 @@
  */
 importPackage(org.wso2.carbon.pc.analytics.config);
 importPackage(org.wso2.carbon.pc.analytics.config.utils);
+importPackage(org.wso2.carbon.pc.core);
 
 var dasConfigClient = new DASConfigClient();
+var ps=new ProcessStore();
 var dasConfigData = String(request.getParameter("dasConfigData"));
 var processName = String(request.getParameter("processName"));
 var processVersion = String(request.getParameter("processVersion"));
-var configurationSuccess ;
 try{
+    ps.saveStreamAndReceiverInfo(dasConfigData,processName,processVersion);
     dasConfigClient.configDAS(dasConfigData);
     DASConfigurationUtils.setPropertyDASAnalyticsConfigured(processName, processVersion);
     print("SUCCESS");

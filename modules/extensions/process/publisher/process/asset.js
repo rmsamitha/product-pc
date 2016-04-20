@@ -172,6 +172,7 @@ asset.renderer = function (ctx) {
 
                 var processVariablesJObArr = JSON.parse(processVariablesJObArrStr);
                 page.processVariableList = processVariablesJObArr;
+                page.streamAndReceiverInfo=ps.getStreamAndReceiverInfo(resourcePath);
             }
 
             var flowchartPath = page.assets.tables[9].fields.path.value;

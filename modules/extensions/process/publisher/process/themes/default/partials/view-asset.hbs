@@ -37,10 +37,10 @@
             <div class="control-group" style="display: inline-block">
                 {{#if DASAnalyticsEnabled}}
                     {{#if DASAnalyticsConfigured}}
-                        <button id="btn_config_analytics" class="btn btn-primary" onclick="showAnalyticsConfigurer()">View Analytics Configs</button>
+                        <button id="btn_config_analytics" class="btn btn-primary" onclick="showAnalyticsConfigurer({{streamAndReceiverInfo}})">View Analytics Configs</button>
                         <input type="hidden" id="hiddenElementIsDASConfiged" value="true">
                     {{else}}
-                        <button id="btn_config_analytics" class="btn btn-primary" onclick="showAnalyticsConfigurer()">Config Analytics</button>
+                        <button id="btn_config_analytics" class="btn btn-primary" onclick="showAnalyticsConfigurer({{streamAndReceiverInfo}})">Config Analytics</button>
                         <input type="hidden" id="hiddenElementIsDASConfiged" value="false">
                     {{/if}}
                 {{/if}}

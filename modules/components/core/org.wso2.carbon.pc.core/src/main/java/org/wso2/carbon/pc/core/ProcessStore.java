@@ -110,7 +110,7 @@ public class ProcessStore {
             }
         } catch (Exception e) {
             String errMsg = "Failed to get the process variables list";
-            throw new ProcessCenterException(errMsg,e);
+            throw new ProcessCenterException(errMsg, e);
         }
         return resourceString;
     }
@@ -122,7 +122,7 @@ public class ProcessStore {
      * @return
      */
     public void saveProcessVariables(String processVariableDetails) throws ProcessCenterException {
-        String processContent=null;
+        String processContent = null;
         try {
             RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
 
@@ -158,21 +158,21 @@ public class ProcessStore {
                     reg.put(processAssetPath, resource);
                 }
                 log.info("Saved process variables to configure analytics");
-                if(log.isDebugEnabled()){
-                    log.debug("Saved process variables to configure analytics.Saved info:"+processVariableDetails);
+                if (log.isDebugEnabled()) {
+                    log.debug("Saved process variables to configure analytics.Saved info:" + processVariableDetails);
                 }
             }
         } catch (TransformerException | JSONException | RegistryException e) {
-            String errMsg = "Failed to save processVariables with info,\n"+processVariableDetails+"\n,to the process.rxt";
+            String errMsg =
+                    "Failed to save processVariables with info,\n" + processVariableDetails + "\n,to the process.rxt";
             log.error(errMsg, e);
-            throw new ProcessCenterException(errMsg,e);
+            throw new ProcessCenterException(errMsg, e);
         } catch (Exception e) {
-            String errMsg="Failed to convert "+processContent+ " registry resource to XML";
+            String errMsg = "Failed to convert " + processContent + " registry resource to XML";
             log.error(errMsg, e);
-            throw new ProcessCenterException(errMsg,e);
+            throw new ProcessCenterException(errMsg, e);
         }
     }
-
 
     public Element append(Document doc, Element parent, String childName, String childNS) {
         Element childElement = doc.createElementNS(childNS, childName);
@@ -408,8 +408,10 @@ public class ProcessStore {
                             appendText(bpmnDoc, bpmnOverview, "version", ProcessStoreConstants.MNS, version);
                             appendText(bpmnDoc, bpmnOverview, "processpath", ProcessStoreConstants.MNS, "");
                             appendText(bpmnDoc, bpmnOverview, "description", ProcessStoreConstants.MNS, "");
-                            Element bpmnAssetContentElement = append(bpmnDoc, bpmnRoot, "content", ProcessStoreConstants.MNS);
-                            appendText(bpmnDoc, bpmnAssetContentElement, "contentpath", ProcessStoreConstants.MNS, bpmnResourcePath);
+                            Element bpmnAssetContentElement = append(bpmnDoc, bpmnRoot, "content",
+                                    ProcessStoreConstants.MNS);
+                            appendText(bpmnDoc, bpmnAssetContentElement, "contentpath", ProcessStoreConstants.MNS,
+                                    bpmnResourcePath);
                             String bpmnAssetContent = xmlToString(bpmnDoc);
 
                             Resource bpmnAsset = reg.newResource();
@@ -1062,8 +1064,10 @@ public class ProcessStore {
                 if (predecessor != null) {
                     Element rootElement = doc.getDocumentElement();
                     Element predecessorElement = append(doc, rootElement, "predecessor", ProcessStoreConstants.MNS);
-                    appendText(doc, predecessorElement, "name", ProcessStoreConstants.MNS, predecessor.getString("name"));
-                    appendText(doc, predecessorElement, "path", ProcessStoreConstants.MNS, predecessor.getString("path"));
+                    appendText(doc, predecessorElement, "name", ProcessStoreConstants.MNS,
+                            predecessor.getString("name"));
+                    appendText(doc, predecessorElement, "path", ProcessStoreConstants.MNS,
+                            predecessor.getString("path"));
                     appendText(doc, predecessorElement, "id", ProcessStoreConstants.MNS, predecessor.getString("id"));
 
                     String newProcessContent = xmlToString(doc);
@@ -1598,6 +1602,128 @@ public class ProcessStore {
         }
 
         return bpmnDiagramString;
+    }
+
+    /**
+     * Get the configured event stream and receiver information (for analytics with DAS), of the process
+     *
+     * @param resourcePath path for the process resource, in governance registry
+     * @return Information of Event Stream and Reciever, configured for the process
+     * @throws ProcessCenterException
+     */
+    public String getStreamAndReceiverInfo(String resourcePath) throws ProcessCenterException {
+        String resourceString = "";
+        try {
+            RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
+            if (registryService != null) {
+                UserRegistry reg = registryService.getGovernanceSystemRegistry();
+                resourcePath = resourcePath.substring(ProcessStoreConstants.GREG_PATH.length());
+                Resource resourceAsset = reg.get(resourcePath);
+                String resourceContent = new String((byte[]) resourceAsset.getContent());
+
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document document = builder.parse(new InputSource(new StringReader(resourceContent)));
+                JSONArray variableArray = new JSONArray();
+                Element dasConfigInfoElement = (Element) ((Element) document.getFirstChild())
+                        .getElementsByTagName("analytics_config_info").item(0);
+                String eventStreamName = dasConfigInfoElement.getElementsByTagName("eventStreamName").item(0)
+                        .getTextContent();
+                String eventStreamVersion = dasConfigInfoElement.getElementsByTagName("eventStreamVersion").item(0)
+                        .getTextContent();
+                String eventStreamDescription = dasConfigInfoElement.getElementsByTagName("eventStreamDescription")
+                        .item(0).getTextContent();
+                String eventStreamNickName = dasConfigInfoElement.getElementsByTagName("eventStreamNickName").item(0)
+                        .getTextContent();
+                String eventReceiverName = dasConfigInfoElement.getElementsByTagName("eventReceiverName").item(0)
+                        .getTextContent();
+
+                JSONObject dasConfigInfoJOb = new JSONObject();
+                dasConfigInfoJOb.put("eventStreamName", eventStreamName);
+                dasConfigInfoJOb.put("eventStreamVersion", eventStreamVersion);
+                dasConfigInfoJOb.put("eventStreamDescription", eventStreamDescription);
+                dasConfigInfoJOb.put("eventStreamNickName", eventStreamNickName);
+                dasConfigInfoJOb.put("eventReceiverName", eventReceiverName);
+
+                resourceString = dasConfigInfoJOb.toString();
+            }
+        } catch (Exception e) {
+            String errMsg = "Failed to get the event stream and receeiver info";
+            throw new ProcessCenterException(errMsg, e);
+        }
+        return resourceString;
+    }
+
+    /**
+     * Save event stream and reciever information configured for analytics with DAS, for this process, in governance
+     * registry in the process.rxt
+     *
+     * @param streamAndReceiverInfo
+     * @param processName
+     * @param processVersion
+     * @throws ProcessCenterException
+     */
+    public void saveStreamAndReceiverInfo(String streamAndReceiverInfo, String processName, String processVersion) throws ProcessCenterException {
+        String processContent = null;
+        try {
+            RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
+
+            if (registryService != null) {
+                UserRegistry reg = registryService.getGovernanceSystemRegistry();
+
+                JSONObject processInfo = new JSONObject(streamAndReceiverInfo);
+               /* String processName = processInfo.getString(ProcessStoreConstants.PROCESS_NAME);
+                String processVersion = processInfo.getString(ProcessStoreConstants.PROCESS_VERSION);*/
+
+                String eventStreamName = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_NAME);
+                String eventStreamVersion = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_VERSION);
+                String eventStreamDescription = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_DESCRIPTION);
+                String eventStreamNickName = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_NICK_NAME);
+                String eventReceiverName = processInfo.getString(ProcessStoreConstants.EVENT_RECEIVER_NAME);
+
+                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
+                        processVersion;
+                Resource resource = reg.get(processAssetPath);
+                processContent = new String((byte[]) resource.getContent());
+                Document doc = stringToXML(processContent);
+
+                //  while (keys.hasNext()) {
+                // String variableName = (String) keys.next();
+                //if (Debugger.isEnabled())
+                // log.debug(variableName);
+                //String variableType = processVariablesJOb.get(variableName).toString();
+                //JSONObject processVariableJOb= (JSONObject) processVariablesArray.get(i);
+                Element rootElement = doc.getDocumentElement();
+                Element dasConfigInfoElement = append(doc, rootElement, "analytics_config_info", ProcessStoreConstants.MNS);
+                appendText(doc, dasConfigInfoElement, "eventStreamName", ProcessStoreConstants.MNS, eventStreamName);
+                appendText(doc, dasConfigInfoElement, "eventStreamVersion", ProcessStoreConstants.MNS,
+                        eventStreamVersion);
+                appendText(doc, dasConfigInfoElement, "eventStreamDescription", ProcessStoreConstants.MNS,
+                        eventStreamDescription);
+                appendText(doc, dasConfigInfoElement, "eventStreamNickName", ProcessStoreConstants.MNS,
+                        eventStreamNickName);
+                appendText(doc, dasConfigInfoElement, "eventReceiverName", ProcessStoreConstants.MNS,
+                        eventReceiverName);
+
+                String newProcessContent = xmlToString(doc);
+                resource.setContent(newProcessContent);
+                reg.put(processAssetPath, resource);
+                // }
+                log.info("Saved das configuration details in the registry");
+                if (log.isDebugEnabled()) {
+                    log.debug("The Saved das configuration details:" + streamAndReceiverInfo);
+                }
+            }
+        } catch (TransformerException | JSONException | RegistryException e) {
+            String errMsg =
+                    "Failed to save das configuration details with info,\n" + streamAndReceiverInfo + "\n,to the process.rxt";
+            log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg, e);
+        } catch (Exception e) {
+            String errMsg = "Failed to convert " + processContent + " registry resource to XML";
+            log.error(errMsg, e);
+            throw new ProcessCenterException(errMsg, e);
+        }
     }
 
     //    public static void main(String[] args) {

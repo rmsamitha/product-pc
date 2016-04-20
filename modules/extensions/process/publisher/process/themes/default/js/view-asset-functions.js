@@ -284,8 +284,7 @@ function newDocFormToggle() {
     $("#addNewDoc").toggle("slow");
 }
 
-function showAnalyticsConfigurer() {
-
+function showAnalyticsConfigurer(streamAndReceiverInfo) {
     $("#overviewDiv").hide();
     $("#processTextContainer").hide();
     $("#processTextEditDiv").hide();
@@ -293,24 +292,27 @@ function showAnalyticsConfigurer() {
     $("#analyticsConfigDiv").show();
     var hiddenElementIsDASConfiged = $('#hiddenElementIsDASConfiged').val();
 
-    //if($('#hiddenElementIsDASConfiged').val()=="true"){
     if (hiddenElementIsDASConfiged == "true") {
+        //show Stream And Reciever Info
+        $('#eventStreamName').val(streamAndReceiverInfo.eventStreamName);
+        $('#eventStreamVersion').val(streamAndReceiverInfo.eventStreamVersion);
+        $('#eventStreamDescription').val(streamAndReceiverInfo.eventStreamDescription);
+        $('#eventStreamNickName').val(streamAndReceiverInfo.eventStreamNickName);
+        $('#eventReceiverName').val(streamAndReceiverInfo.eventReceiverName);
+
+        //disable the editability of the configs
         $('#eventStreamName').attr("readonly", "false");
         $('#eventStreamVersion').attr("readonly", "true");
         $('#eventStreamDescription').attr("readonly", "true");
         $('#eventStreamNickName').attr("readonly", "true");
-        $('#eventStreamNickName').attr("readonly", "true");
         $('#eventReceiverName').attr("readonly", "true");
-
         $("#btn_save_analytics_configurations").attr("disabled", true);
         $("#btn_addProcessVariablesRow").prop("onclick", null);
         $("#btn_deleteProcessVariablesRow").prop("onclick", null);
-
         $('#updateDisabledMessage').text("Analytics Configuration cannot be editted once configured");
-        $('#updateDisabledMessage').css({color:'#00f'});
+        $('#updateDisabledMessage').css({color: '#00f'});
 
-        //here load the values for the other receiver/stream fields from registry or etc..
-    }else {
+    } else {
         $('#eventStreamName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream");
         $('#eventStreamVersion').val("1.0.0");
         $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with DAS, for the process" + $('#view-header').text() + "_" + $('#process-version').text());
@@ -974,7 +976,7 @@ var processVariablesInfo = {};
 var processVariables = {};
 var processVariablesObjsArr = [];
 
-function saveProcessVariables(tableID,callback) {
+function saveProcessVariables(tableID, callback) {
     var table = document.getElementById(tableID);
     var rowCount = table.rows.length;
 
@@ -1016,19 +1018,20 @@ function saveProcessVariables(tableID,callback) {
         url: '/publisher/assets/process/apis/save_process_variables',
         type: 'POST',
         data: {'processVariablesInfo': JSON.stringify(processVariablesInfo)},
+        async: false,
         success: function (response) {
             if (response == "FAIL") {
                 alertify.error('Process variables saving error');
-                returnValue="ERROR";
+                returnValue = "ERROR";
                 callback(returnValue);
-            }else{
-                returnValue="SUCCESS";
+            } else {
+                returnValue = "SUCCESS";
                 callback(returnValue);
             }
         },
         error: function (response) {
             alertify.error('Process variables saving error');
-            returnValue="ERROR";
+            returnValue = "ERROR";
             callback1(returnValue);
         }
     });
@@ -1055,9 +1058,8 @@ function configAnalytics() {
             return;
         }
 
-        //var saveProcessVariableSuccess;
-        saveProcessVariables('dataTable',function(callbackVal){
-            if(callbackVal=="ERROR"){
+        saveProcessVariables('dataTable', function (callbackVal) {
+            if (callbackVal == "ERROR") {
                 return;
             }
         });
@@ -1104,7 +1106,7 @@ function configAnalytics() {
                     $('#eventStreamNickName').attr("readonly", "true");
                     $('#eventReceiverName').attr("readonly", "true");
 
-                    $("#dataTable tr").each(function (){
+                    $("#dataTable tr").each(function () {
                         $(this).children().each(function () {
                             $(this).find("input").attr("readonly", "true");
                             $(this).find("select").attr("disabled", "true");
