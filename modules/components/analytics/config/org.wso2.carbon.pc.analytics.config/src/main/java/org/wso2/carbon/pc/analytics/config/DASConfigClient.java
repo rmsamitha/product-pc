@@ -33,6 +33,7 @@ import org.wso2.carbon.pc.analytics.config.clients.ReceiverAdminServiceClient;
 import org.wso2.carbon.pc.analytics.config.clients.StreamAdminServiceClient;
 import org.wso2.carbon.pc.analytics.config.utils.DASConfigurationUtils;
 import org.wso2.carbon.pc.core.ProcessCenterException;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -51,6 +52,13 @@ public class DASConfigClient {
     String DASUrl = null;
     private static final Log log = LogFactory.getLog(DASConfigClient.class);
 
+    /**
+     * Configure WSO2 DAS for analytics, by creating an Event Stream, Event Receiver for each process
+     * @param DASconfigDetails Data given by the user for the configurations
+     * @throws ProcessCenterException
+     * @throws RemoteException
+     * @throws LogoutAuthenticationExceptionException
+     */
     public void configDAS(String DASconfigDetails)
             throws ProcessCenterException, RemoteException, LogoutAuthenticationExceptionException {
 
@@ -74,10 +82,12 @@ public class DASConfigClient {
             receiverName = processInfo.getString(AnalyticsConfigConstants.EVENT_RECEIVER_NAME);
             processVariablesJObArr = processInfo.getJSONArray(AnalyticsConfigConstants.PROCESS_VARIABLES);
 
-            System.setProperty("javax.net.ssl.trustStore",
+            /*System.setProperty("javax.net.ssl.trustStore",
                     "/home/samithac/wso2-products/wso2das-3.0.1/repository/resources/security/wso2carbon.jks");
             System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
             System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+            RegistryUtils.setTrustStoreSystemProperties();*/
+
 
             //login to DAS
             login = new LoginAdminServiceClient(DASUrl);

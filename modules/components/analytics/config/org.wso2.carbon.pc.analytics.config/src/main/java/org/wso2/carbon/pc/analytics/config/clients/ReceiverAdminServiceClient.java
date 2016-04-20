@@ -39,6 +39,15 @@ public class ReceiverAdminServiceClient {
     private String eventAdapterType = "wso2event";
     private static final Log log = LogFactory.getLog(ReceiverAdminServiceClient.class);
 
+    /**
+     *
+     * @param backEndUrl
+     * @param sessionCookie
+     * @param receiverName
+     * @param streamId
+     * @param wso2event
+     * @throws AxisFault
+     */
     public ReceiverAdminServiceClient(String backEndUrl, String sessionCookie, String receiverName, String streamId,
             String wso2event) throws AxisFault {
         this.endPoint = backEndUrl + "/" + AnalyticsConfigConstants.SERVICES + "/" + serviceName;
@@ -59,6 +68,11 @@ public class ReceiverAdminServiceClient {
                 + ", DAS url:" + backEndUrl;
     }
 
+    /**
+     * Deploy Event Receiver for the perticular process, configuring the previously created Event Stream
+     *
+     * @throws ProcessCenterException
+     */
     public void deployEventReceiverConfiguration() throws ProcessCenterException {
         BasicInputAdapterPropertyDto props[] = new BasicInputAdapterPropertyDto[1];
         props[0] = new BasicInputAdapterPropertyDto();

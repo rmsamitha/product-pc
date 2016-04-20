@@ -489,7 +489,7 @@ function getTagList() {
             }
         },
         error: function () {
-            alertify.error('Tag List error');
+            //alertify.error('Tag List error');
         }
     });
 }

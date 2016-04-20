@@ -921,6 +921,10 @@ function redirectTo(element) {
 }
 
 //******************************DAS Analytics Configuration***********************************
+
+/*
+ Add a new row for a new process variable to the process Variables table in the Config Analytics view
+ */
 function addProcessVariableRow(tableID) {
 
     var table = document.getElementById(tableID);
@@ -946,6 +950,9 @@ function addProcessVariableRow(tableID) {
     // '</div>';
 }
 
+/*
+Delete process variable related table row in the Config Analytics view
+ */
 function deleteProcessVariableRow(tableID) {
     try {
         var table = document.getElementById(tableID);
@@ -976,6 +983,9 @@ var processVariablesInfo = {};
 var processVariables = {};
 var processVariablesObjsArr = [];
 
+/*
+ Save the process variables which need to be configured for analytics, in process rxt in Governance Registry
+ */
 function saveProcessVariables(tableID, callback) {
     var table = document.getElementById(tableID);
     var rowCount = table.rows.length;
@@ -1037,6 +1047,9 @@ function saveProcessVariables(tableID, callback) {
     });
 }
 
+/*
+  Configure DAS for analytics- called seperately for each process
+ */
 function configAnalytics() {
     var hiddenElementIsDASConfiged = $('#hiddenElementIsDASConfiged').val();
 

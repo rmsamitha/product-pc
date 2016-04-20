@@ -50,6 +50,19 @@ public class StreamAdminServiceClient {
     private static final Log log = LogFactory.getLog(StreamAdminServiceClient.class);
     JSONObject streamDefinitionJsonOb;
 
+    /**
+     * Implement basic configurations to create event stream
+     *
+     * @param backEndUrl
+     * @param session
+     * @param streamName
+     * @param streamVersion
+     * @param streamId
+     * @param streamNickName
+     * @param streamDescription
+     * @param processVariablesJObArr
+     * @throws ProcessCenterException
+     */
     public StreamAdminServiceClient(String backEndUrl, String session, String streamName, String streamVersion,
             String streamId, String streamNickName, String streamDescription, JSONArray processVariablesJObArr)
             throws ProcessCenterException {
@@ -85,6 +98,11 @@ public class StreamAdminServiceClient {
         }
     }
 
+    /**
+     * Create an Event Stream in DAS for the perticular process
+     *
+     * @throws ProcessCenterException
+     */
     public void createEventStream() throws ProcessCenterException {
         try {
             serviceAdminStub.addEventStreamDefinitionAsString(streamDefinitionJsonOb.toString());
