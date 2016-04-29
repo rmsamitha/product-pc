@@ -1002,7 +1002,7 @@ function saveProcessVariables(tableID, callback) {
     processVariablesInfo["processVersion"] = processVersion;
 
     //put processInstanceId as a compulsory field in the stream
-    processVariables["processInstanceId"] = "string";
+    //processVariables["processInstanceId"] = "string";
 
 
     for (var i = 1; i < rowCount; i++) {
@@ -1091,6 +1091,14 @@ function configAnalytics() {
         dasConfigData["eventStreamNickName"] = eventStreamNickName;
         dasConfigData["eventStreamId"] = eventStreamId;
         dasConfigData["eventReceiverName"] = eventReceiverName;
+
+        //adding process instanceId field to the process variables objects array, so that there will be a field for that
+        //processInstanceId too in the event Stream that will be created in DAS
+        var procInstancIdItem = {};
+        procInstancIdItem["name"] = "processInstanceId";
+        procInstancIdItem["type"] = "string";
+        processVariablesObjsArr.push(procInstancIdItem);
+
         dasConfigData["processVariables"] = processVariablesObjsArr;
 
         var bpsConfigData = {};

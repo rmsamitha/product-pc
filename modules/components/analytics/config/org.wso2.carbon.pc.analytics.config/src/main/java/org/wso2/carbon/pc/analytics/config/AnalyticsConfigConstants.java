@@ -16,7 +16,7 @@
 package org.wso2.carbon.pc.analytics.config;
 
 /**
- * Keep all the constants of analytics config
+ * Keep all the constants related to analytics configuration
  */
 public class AnalyticsConfigConstants {
     public static final String ANALYTICS = "analytics";
@@ -41,4 +41,6 @@ public class AnalyticsConfigConstants {
     public static final String DAS_USER_NAME= "dasUsername";
     public static final String DAS_PASSWORD= "dasPassword";
     public static final String EVENT_STREAM_ADMIN_SERVICE_NAME= "EventStreamAdminService";
+    public static final String BPS_BASE_URL = "bpsBaseUrl";
+    public static final String BPS_PROCESS_VAR_PUBLISH_REST_PATH = "/bpmn/analytics/publish-process-variables/" ;
 }

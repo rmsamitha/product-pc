@@ -183,6 +183,23 @@ public class DASConfigurationUtils {
         return null;
     }
 
+    public static String getBPSURL() throws IOException, XMLStreamException {
+        OMElement configElement = getConfigElement();
+        OMElement analyticsElement = configElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
+        if (analyticsElement != null) {
+            String baseUrl = analyticsElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.BPS_BASE_URL))
+                    .getText();
+            if (baseUrl != null && !baseUrl.isEmpty()) {
+                if (baseUrl.endsWith(File.separator)) {
+                    //baseUrl += File.separator;
+                    return baseUrl.substring(0, baseUrl.length() - 1);
+                }
+                return baseUrl;
+            }
+        }
+        return null;
+    }
+
     /**
      * @return AuthorizationHeader
      * @throws IOException
@@ -215,7 +232,7 @@ public class DASConfigurationUtils {
             byte[] encodedBytes = headerPortion.getBytes("UTF-8");
             String encodedString = DatatypeConverter.printBase64Binary(encodedBytes);
             //requestHeader += encodedString;
-            return AnalyticsConfigConstants.REQUEST_HEADER_BASIC + encodedString;
+            return AnalyticsConfigConstants.REQUEST_HEADER_BASIC+" " + encodedString;
         }
         return null;
     }
