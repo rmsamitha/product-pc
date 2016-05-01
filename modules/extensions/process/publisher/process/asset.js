@@ -161,9 +161,9 @@ asset.renderer = function (ctx) {
 
             page.involveProcessList = conObject;
 
-            importPackage(org.wso2.carbon.pc.analytics.core.utils);
+            importPackage(org.wso2.carbon.pc.analytics.core.generic.utils);
             page.DASAnalyticsEnabled = AnalyticsUtils.isDASAnalyticsActivated();
-            importPackage(org.wso2.carbon.pc.analytics.config.utils);
+            importPackage(org.wso2.carbon.pc.analytics.core.kpi.utils);
             page.DASAnalyticsConfigured = DASConfigurationUtils.isDASAnalyticsConfigured(processName, processVersion);
 
             var processVariablesJObArrStr;

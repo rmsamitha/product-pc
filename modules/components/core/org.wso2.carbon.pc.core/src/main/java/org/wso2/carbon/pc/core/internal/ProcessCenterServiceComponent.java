@@ -33,7 +33,6 @@ public class ProcessCenterServiceComponent {
     protected void activate(ComponentContext ctxt) {
         log.info("Initializing the PC core component...");
         try {
-            ProcessCenterServerHolder holder = ProcessCenterServerHolder.getInstance();
             RegistryUtils.setTrustStoreSystemProperties();
         }catch (Throwable e) {
             log.error("Failed to initialize the BPMN core component.", e);

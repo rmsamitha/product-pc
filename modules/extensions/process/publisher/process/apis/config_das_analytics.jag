@@ -17,8 +17,8 @@
  *  under the License.
  *
  */
-importPackage(org.wso2.carbon.pc.analytics.config);
-importPackage(org.wso2.carbon.pc.analytics.config.utils);
+importPackage(org.wso2.carbon.pc.analytics.core.kpi);
+importPackage(org.wso2.carbon.pc.analytics.core.kpi.utils);
 importPackage(org.wso2.carbon.pc.core);
 
 var dasConfigClient = new DASConfigClient();
