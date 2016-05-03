@@ -1,7 +1,23 @@
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.wso2.carbon.pc.analytics.core.kpi;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.HttpsURL;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
@@ -15,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Created by samithac on 24/3/16.
+ * Rest Client to communicate the analytics configuration details to the WSO2 BPS from PC
  */
 public class BPSConfigRestClient {
     private static final Log log = LogFactory.getLog(BPSConfigRestClient.class);
@@ -29,7 +45,7 @@ public class BPSConfigRestClient {
      * @return the result as a String
      */
     public static void post(String message, String processName, String processVersion)
-            throws IOException, XMLStreamException {
+            throws IOException, XMLStreamException, RuntimeException {
 
         String bpsurl = DASConfigurationUtils.getBPSURL();
         RegistryUtils.setTrustStoreSystemProperties();
@@ -42,13 +58,6 @@ public class BPSConfigRestClient {
         postRequest.setRequestEntity(input);
 
         int returnCode = httpClient.executeMethod(postRequest);
-
-        //deal with the response
-        if (returnCode != HttpStatus.SC_OK) {
-            String errorCode =
-                    "Failed : Sending the REST Post call to the WSO2 BPS to communicate the analytics configuration details to the BPS from PC\n: HTTP error code : " + returnCode;
-            throw new RuntimeException(errorCode);
-        }
 
         InputStreamReader reader = new InputStreamReader((postRequest.getResponseBodyAsStream()));
         BufferedReader br = new BufferedReader(reader);
@@ -64,18 +73,29 @@ public class BPSConfigRestClient {
             totalOutput.append(output);
         }
 
-        if(totalOutput.toString().equals("Success")){
-            log.info("BPS was acknowleged the Analytics Configuration details");
-        }
+        String responseMsg= totalOutput.toString();
 
         postRequest.releaseConnection();
         if (br != null) {
             try {
                 br.close();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 String errMsg = "BPS Config Rest client BufferedReader close exception.";
                 log.error(errMsg, e);
             }
+        }
+
+        //deal with the response
+        if(returnCode == HttpStatus.SC_OK){
+            log.info("BPS was acknowleged the Analytics Configuration details");
+        }else if (returnCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+            log.info(responseMsg);
+            throw new RuntimeException(responseMsg);
+        }else{
+            String errMsg =
+                  "Failed : Sending the REST Post call to the WSO2 BPS to communicate the analytics configuration details to the BPS from PC\n: HTTP Error code : " + returnCode;
+            log.info(errMsg);
+            throw new RuntimeException(responseMsg);
         }
     }
 }

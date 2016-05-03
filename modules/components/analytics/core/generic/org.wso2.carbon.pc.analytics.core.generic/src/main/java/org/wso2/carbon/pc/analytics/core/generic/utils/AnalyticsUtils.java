@@ -169,8 +169,8 @@ public class AnalyticsUtils {
 					.getFirstChildWithName(new QName(AnalyticsConstants.CONFIG_USER_NAME))
 					.getText();
 			if (secretResolver != null && secretResolver.isInitialized()) {
-				if (secretResolver.isTokenProtected(AnalyticsConstants.SECRET_ALIAS)) {
-					password = secretResolver.resolve(AnalyticsConstants.SECRET_ALIAS);
+				if (secretResolver.isTokenProtected(AnalyticsConstants.SECRET_ALIAS_DAS_PW)) {
+					password = secretResolver.resolve(AnalyticsConstants.SECRET_ALIAS_DAS_PW);
 				} else {
 					password = analyticsElement
 							.getFirstChildWithName(new QName(AnalyticsConstants.CONFIG_PASSWORD))

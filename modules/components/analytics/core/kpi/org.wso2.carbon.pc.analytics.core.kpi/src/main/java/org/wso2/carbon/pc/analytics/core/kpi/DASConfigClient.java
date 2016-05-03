@@ -20,6 +20,7 @@ package org.wso2.carbon.pc.analytics.core.kpi;
  * (initiator class in the module)
  */
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,12 +30,13 @@ import org.json.JSONObject;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException;
 import org.wso2.carbon.pc.analytics.core.kpi.clients.LoginAdminServiceClient;
-import org.wso2.carbon.pc.analytics.core.kpi.clients.ReceiverAdminServiceClient;
-import org.wso2.carbon.pc.analytics.core.kpi.clients.StreamAdminServiceClient;
 import org.wso2.carbon.pc.analytics.core.kpi.internal.PCAnalyticsServerHolder;
 import org.wso2.carbon.pc.analytics.core.kpi.utils.DASConfigurationUtils;
 import org.wso2.carbon.pc.core.ProcessCenterException;
+import org.wso2.securevault.SecretResolver;
+import org.wso2.securevault.SecretResolverFactory;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -67,12 +69,27 @@ public class DASConfigClient {
         JSONObject processInfo = null;
         LoginAdminServiceClient loginServiceClient = null;
         String dasUsername = null;
-        //String dasPassword=null;
         char[] dasPassword = null;
 
         try {
+            String requestHeader = "Basic ";
+            OMElement configElement = DASConfigurationUtils.getConfigElement();
+            SecretResolver secretResolver = SecretResolverFactory.create(configElement, false);
+            OMElement analyticsElement = configElement
+                    .getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
             dasUsername = DASConfigurationUtils.getDASUserName();
-            dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
+            ///
+            if (secretResolver != null && secretResolver.isInitialized()) {
+                if (secretResolver.isTokenProtected(AnalyticsConfigConstants.SECRET_ALIAS_DAS_PASSWORD)) {
+                    dasPassword = secretResolver.resolve(AnalyticsConfigConstants.SECRET_ALIAS_DAS_PASSWORD).toCharArray();
+                } else {
+                    dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
+                }
+            } else {
+                dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
+            }
+
+            //dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
             DASUrl = DASConfigurationUtils.getDASURL();
             processInfo = new JSONObject(DASconfigDetails);
             streamName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
@@ -112,7 +129,6 @@ public class DASConfigClient {
 
             //logging out from DAS Admin Services
             loginServiceClient.logOut();
-
         } catch (LoginAuthenticationExceptionException e) {
             String errMsg = "Error in Login to DAS at :" + DASUrl + "trying to login with username:" + dasUsername
                     + " and the given password";
@@ -137,7 +153,11 @@ public class DASConfigClient {
         } catch (ProcessCenterException e) {
             log.error(e.getMessage(), e);
             throw new ProcessCenterException(e.getMessage(), e);
-        } finally {
+        }catch(RuntimeException e){
+            log.error(e.getMessage(), e);
+            throw new ProcessCenterException(e.getMessage(), e);
+        }
+        finally {
             loginServiceClient.logOut();
         }
     }

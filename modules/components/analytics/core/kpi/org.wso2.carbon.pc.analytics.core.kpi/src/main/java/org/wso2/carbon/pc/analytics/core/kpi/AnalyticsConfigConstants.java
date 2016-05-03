@@ -24,7 +24,8 @@ public class AnalyticsConfigConstants {
     public static final String PC_CONFIGURATION_FILE_NAME = "pc.xml";
     public static final String CONFIG_USER_NAME = "bpsUsername";
     public static final String CONFIG_PASSWORD = "bpsPassword";
-    public static final String SECRET_ALIAS = "PC.Analytics.Password";
+    public static final String SECRET_ALIAS_BPS_PASSWORD = "PC.Analytics.BPSPassword";
+    public static final String SECRET_ALIAS_DAS_PASSWORD = "PC.Analytics.DASPassword";
     public static final String EVENT_STREAM_NAME = "eventStreamName";
 
     public static final String EVENT_STREAM_VERSION = "eventStreamVersion";

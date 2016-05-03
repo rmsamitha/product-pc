@@ -152,7 +152,7 @@ public class DASConfigurationUtils {
      * @throws IOException
      * @throws XMLStreamException
      */
-    private static OMElement getConfigElement() throws IOException, XMLStreamException {
+    public static OMElement getConfigElement() throws IOException, XMLStreamException {
         String carbonConfigDirPath = CarbonUtils.getCarbonConfigDirPath();
         String pcConfigPath = carbonConfigDirPath + File.separator +
                 AnalyticsConfigConstants.PC_CONFIGURATION_FILE_NAME;
@@ -211,24 +211,24 @@ public class DASConfigurationUtils {
         OMElement analyticsElement = configElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
 
         String userName = null;
-        String password = null;
+        char[] password=null;
         if (analyticsElement != null) {
             userName = analyticsElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.CONFIG_USER_NAME))
                     .getText();
             if (secretResolver != null && secretResolver.isInitialized()) {
-                if (secretResolver.isTokenProtected(AnalyticsConfigConstants.SECRET_ALIAS)) {
-                    password = secretResolver.resolve(AnalyticsConfigConstants.SECRET_ALIAS);
+                if (secretResolver.isTokenProtected(AnalyticsConfigConstants.SECRET_ALIAS_BPS_PASSWORD)) {
+                    password = secretResolver.resolve(AnalyticsConfigConstants.SECRET_ALIAS_BPS_PASSWORD).toCharArray();
                 } else {
                     password = analyticsElement
-                            .getFirstChildWithName(new QName(AnalyticsConfigConstants.CONFIG_PASSWORD)).getText();
+                            .getFirstChildWithName(new QName(AnalyticsConfigConstants.CONFIG_PASSWORD)).getText().toCharArray();
                 }
             } else {
                 password = analyticsElement.getFirstChildWithName(new QName(AnalyticsConfigConstants.CONFIG_PASSWORD))
-                        .getText();
+                        .getText().toCharArray();
             }
         }
         if (userName != null && password != null) {
-            String headerPortion = userName + ":" + password;
+            String headerPortion = userName + ":" + String.valueOf(password);
             byte[] encodedBytes = headerPortion.getBytes("UTF-8");
             String encodedString = DatatypeConverter.printBase64Binary(encodedBytes);
             //requestHeader += encodedString;
