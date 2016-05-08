@@ -299,6 +299,7 @@ function showAnalyticsConfigurer(streamAndReceiverInfo) {
         $('#eventStreamDescription').val(streamAndReceiverInfo.eventStreamDescription);
         $('#eventStreamNickName').val(streamAndReceiverInfo.eventStreamNickName);
         $('#eventReceiverName').val(streamAndReceiverInfo.eventReceiverName);
+        $('#processDefinitionId').val(streamAndReceiverInfo.processDefinitionId);
 
         //disable the editability of the configs
         $('#eventStreamName').attr("readonly", "false");
@@ -951,7 +952,7 @@ function addProcessVariableRow(tableID) {
 }
 
 /*
-Delete process variable related table row in the Config Analytics view
+ Delete process variable related table row in the Config Analytics view
  */
 function deleteProcessVariableRow(tableID) {
     try {
@@ -1048,7 +1049,7 @@ function saveProcessVariables(tableID, callback) {
 }
 
 /*
-  Configure DAS for analytics- called seperately for each process
+ Configure DAS for analytics- called seperately for each process
  */
 function configAnalytics() {
     var hiddenElementIsDASConfiged = $('#hiddenElementIsDASConfiged').val();
@@ -1077,20 +1078,27 @@ function configAnalytics() {
             }
         });
 
+        var processName = $('#view-header').text();
+        var processVersion = $('#process-version').text();
+        var pcProcessId = processName + ":" + processVersion;
+
         var eventStreamName = $('#eventStreamName').val();
         var eventStreamVersion = $('#eventStreamVersion').val();
         var eventStreamDescription = $('#eventStreamDescription').val();
         var eventStreamNickName = $('#eventStreamNickName').val();
         var eventReceiverName = $('#eventReceiverName').val();
+        var processDefinitionId = $('#processDefinitionId').val();
 
         var eventStreamId = eventStreamName + ":" + eventStreamVersion;
         var dasConfigData = {};
+        dasConfigData["processDefinitionId"] = processDefinitionId;
         dasConfigData["eventStreamName"] = eventStreamName;
         dasConfigData["eventStreamVersion"] = eventStreamVersion;
         dasConfigData["eventStreamDescription"] = eventStreamDescription;
         dasConfigData["eventStreamNickName"] = eventStreamNickName;
         dasConfigData["eventStreamId"] = eventStreamId;
         dasConfigData["eventReceiverName"] = eventReceiverName;
+        dasConfigData["pcProcessId"] = pcProcessId;
 
         //adding process instanceId field to the process variables objects array, so that there will be a field for that
         //processInstanceId too in the event Stream that will be created in DAS
@@ -1104,8 +1112,6 @@ function configAnalytics() {
         var bpsConfigData = {};
         // bpsConfigData["processVariables"]=processVariablesObjsArr;
 
-        var processName = $('#view-header').text();
-        var processVersion = $('#process-version').text();
 
         $.ajax({
             url: '/publisher/assets/process/apis/config_das_analytics',

@@ -659,6 +659,23 @@
             </div>
         </form>
     </div>
+
+    <h2 class="field-title">
+        <a class="collapsing-h2" aria-expanded="true" href="#bpsAssociationInfo" data-toggle="collapse">
+            <i class="cu-btn-exp-col btn-collapsed">BPS Association</i>
+        </a>
+    </h2>
+    <div class="collapse in responsive-form-container" id="bpsAssociationInfo">
+        <form id="bpsAssociationInfoForm" class="form-horizontal">
+            <div class="form-group">
+                <label class="custom-form-label col-lg-2 col-md-2 col-sm-12 col-xs-12">Process Definition ID<sup class="required-field">*</sup></label>
+                <div class="custom-form-right col-lg-5 col-md-8 col-sm-8 col-xs-12">
+                    <input onblur="blurIt()" type="text" placeholder="Enter Process Definition ID" name="process_definition_id" id="processDefinitionId" class="form-control" required="">
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div><label   id="updateDisabledMessage"></label></div>
     <button  id="btn_save_analytics_configurations" onclick="configAnalytics()" class="btn btn-primary">Save Configurations</button>
 </div>

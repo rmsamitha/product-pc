@@ -130,6 +130,9 @@
         </table>
         <table name="Analytics_Config_Info" >
             <field type="text" required="true">
+                <name>processDefinitionId</name>
+            </field>
+            <field type="text" required="true">
                 <name>eventStreamName</name>
             </field>
             <field type="text" required="true">

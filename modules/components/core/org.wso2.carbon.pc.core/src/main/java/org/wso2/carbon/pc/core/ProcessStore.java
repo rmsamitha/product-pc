@@ -132,7 +132,7 @@ public class ProcessStore {
                 JSONObject processInfo = new JSONObject(processVariableDetails);
                 String processName = processInfo.getString(ProcessStoreConstants.PROCESS_NAME);
                 String processVersion = processInfo.getString(ProcessStoreConstants.PROCESS_VERSION);
-                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT +processName + "/" +
+                String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
                         processVersion;
                 Resource resource = reg.get(processAssetPath);
                 processContent = new String((byte[]) resource.getContent());
@@ -1627,6 +1627,8 @@ public class ProcessStore {
                 JSONArray variableArray = new JSONArray();
                 Element dasConfigInfoElement = (Element) ((Element) document.getFirstChild())
                         .getElementsByTagName("analytics_config_info").item(0);
+                String processDefinitionId = dasConfigInfoElement.getElementsByTagName("processDefinitionId").item(0)
+                        .getTextContent();
                 String eventStreamName = dasConfigInfoElement.getElementsByTagName("eventStreamName").item(0)
                         .getTextContent();
                 String eventStreamVersion = dasConfigInfoElement.getElementsByTagName("eventStreamVersion").item(0)
@@ -1639,6 +1641,7 @@ public class ProcessStore {
                         .getTextContent();
 
                 JSONObject dasConfigInfoJOb = new JSONObject();
+                dasConfigInfoJOb.put("processDefinitionId",processDefinitionId);
                 dasConfigInfoJOb.put("eventStreamName", eventStreamName);
                 dasConfigInfoJOb.put("eventStreamVersion", eventStreamVersion);
                 dasConfigInfoJOb.put("eventStreamDescription", eventStreamDescription);
@@ -1658,12 +1661,13 @@ public class ProcessStore {
      * Save event stream and reciever information configured for analytics with DAS, for this process, in governance
      * registry in the process.rxt
      *
-     * @param streamAndReceiverInfo
+     * @param dasConfigData
      * @param processName
      * @param processVersion
      * @throws ProcessCenterException
      */
-    public void saveStreamAndReceiverInfo(String streamAndReceiverInfo, String processName, String processVersion) throws ProcessCenterException {
+    public void saveStreamAndReceiverInfo(String dasConfigData, String processName, String processVersion)
+            throws ProcessCenterException {
         String processContent = null;
         try {
             RegistryService registryService = ProcessCenterServerHolder.getInstance().getRegistryService();
@@ -1671,15 +1675,17 @@ public class ProcessStore {
             if (registryService != null) {
                 UserRegistry reg = registryService.getGovernanceSystemRegistry();
 
-                JSONObject processInfo = new JSONObject(streamAndReceiverInfo);
+                JSONObject dasConfigDataJOb = new JSONObject(dasConfigData);
                /* String processName = processInfo.getString(ProcessStoreConstants.PROCESS_NAME);
                 String processVersion = processInfo.getString(ProcessStoreConstants.PROCESS_VERSION);*/
 
-                String eventStreamName = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_NAME);
-                String eventStreamVersion = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_VERSION);
-                String eventStreamDescription = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_DESCRIPTION);
-                String eventStreamNickName = processInfo.getString(ProcessStoreConstants.EVENT_STREAM_NICK_NAME);
-                String eventReceiverName = processInfo.getString(ProcessStoreConstants.EVENT_RECEIVER_NAME);
+                String processDefinitionId = dasConfigDataJOb.getString(ProcessStoreConstants.PROCESS_DEFINITION_ID);
+                String eventStreamName = dasConfigDataJOb.getString(ProcessStoreConstants.EVENT_STREAM_NAME);
+                String eventStreamVersion = dasConfigDataJOb.getString(ProcessStoreConstants.EVENT_STREAM_VERSION);
+                String eventStreamDescription = dasConfigDataJOb
+                        .getString(ProcessStoreConstants.EVENT_STREAM_DESCRIPTION);
+                String eventStreamNickName = dasConfigDataJOb.getString(ProcessStoreConstants.EVENT_STREAM_NICK_NAME);
+                String eventReceiverName = dasConfigDataJOb.getString(ProcessStoreConstants.EVENT_RECEIVER_NAME);
 
                 String processAssetPath = ProcessStoreConstants.PROCESS_ASSET_ROOT + processName + "/" +
                         processVersion;
@@ -1694,7 +1700,10 @@ public class ProcessStore {
                 //String variableType = processVariablesJOb.get(variableName).toString();
                 //JSONObject processVariableJOb= (JSONObject) processVariablesArray.get(i);
                 Element rootElement = doc.getDocumentElement();
-                Element dasConfigInfoElement = append(doc, rootElement, "analytics_config_info", ProcessStoreConstants.MNS);
+                Element dasConfigInfoElement = append(doc, rootElement, "analytics_config_info",
+                        ProcessStoreConstants.MNS);
+                appendText(doc, dasConfigInfoElement, "processDefinitionId", ProcessStoreConstants.MNS,
+                        processDefinitionId);
                 appendText(doc, dasConfigInfoElement, "eventStreamName", ProcessStoreConstants.MNS, eventStreamName);
                 appendText(doc, dasConfigInfoElement, "eventStreamVersion", ProcessStoreConstants.MNS,
                         eventStreamVersion);
@@ -1711,12 +1720,12 @@ public class ProcessStore {
                 // }
                 log.info("Saved das configuration details in the registry");
                 if (log.isDebugEnabled()) {
-                    log.debug("The Saved das configuration details:" + streamAndReceiverInfo);
+                    log.debug("The Saved das configuration details:" + dasConfigData);
                 }
             }
         } catch (TransformerException | JSONException | RegistryException e) {
             String errMsg =
-                    "Failed to save das configuration details with info,\n" + streamAndReceiverInfo + "\n,to the process.rxt";
+                    "Failed to save das configuration details with info,\n" + dasConfigData + "\n,to the process.rxt";
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
         } catch (Exception e) {

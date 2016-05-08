@@ -15,4 +15,5 @@ public class ProcessStoreConstants {
     public static final String EVENT_STREAM_DESCRIPTION = "eventStreamDescription";
     public static final String EVENT_STREAM_NICK_NAME = "eventStreamNickName";
     public static final String EVENT_RECEIVER_NAME = "eventReceiverName";
+    public static final String PROCESS_DEFINITION_ID = "processDefinitionId";
 }

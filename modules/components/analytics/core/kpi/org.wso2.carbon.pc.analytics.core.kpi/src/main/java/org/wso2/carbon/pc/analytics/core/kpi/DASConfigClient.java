@@ -51,22 +51,22 @@ public class DASConfigClient {
     String streamNickName;
     String receiverName;
     JSONArray processVariablesJObArr;
-    String DASUrl = null;
+    String dasUrl = null;
     private static final Log log = LogFactory.getLog(DASConfigClient.class);
 
     /**
      * Configure WSO2 DAS for analytics, by creating an Event Stream, Event Receiver for each process.
      * In the event stream a field for processInstanceId too would be set.
      *
-     * @param DASconfigDetails Data given by the user for the configurations
+     * @param dasConfigDetails Data given by the user for the configurations
      * @throws ProcessCenterException
      * @throws RemoteException
      * @throws LogoutAuthenticationExceptionException
      */
-    public void configDAS(String DASconfigDetails, String processName, String processVersion)
+    public void configDAS(String dasConfigDetails, String processName, String processVersion)
             throws ProcessCenterException, RemoteException, LogoutAuthenticationExceptionException {
 
-        JSONObject processInfo = null;
+        JSONObject dasConfigDetailsJOb = null;
         LoginAdminServiceClient loginServiceClient = null;
         String dasUsername = null;
         char[] dasPassword = null;
@@ -90,15 +90,16 @@ public class DASConfigClient {
             }
 
             //dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
-            DASUrl = DASConfigurationUtils.getDASURL();
-            processInfo = new JSONObject(DASconfigDetails);
-            streamName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
-            stremaVersion = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_VERSION);
-            streamId = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_ID);
-            streamDescription = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_DESCRIPTION);
-            streamNickName = processInfo.getString(AnalyticsConfigConstants.EVENT_STREAM_NICK_NAME);
-            receiverName = processInfo.getString(AnalyticsConfigConstants.EVENT_RECEIVER_NAME);
-            processVariablesJObArr = processInfo.getJSONArray(AnalyticsConfigConstants.PROCESS_VARIABLES);
+            dasUrl = DASConfigurationUtils.getDASURL();
+            dasConfigDetailsJOb = new JSONObject(dasConfigDetails);
+            streamName = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
+            stremaVersion = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_VERSION);
+            streamId = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_ID);
+            streamDescription = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_DESCRIPTION);
+            streamNickName = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_NICK_NAME);
+            receiverName = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_RECEIVER_NAME);
+            processVariablesJObArr = dasConfigDetailsJOb.getJSONArray(AnalyticsConfigConstants.PROCESS_VARIABLES);
+            //pcProcessId = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.PC_PROCESS_ID);
 
             //login to DAS
             loginServiceClient = PCAnalyticsServerHolder.getInstance().getLoginAdminServiceClient();
@@ -108,12 +109,12 @@ public class DASConfigClient {
             Arrays.fill(dasPassword, ' ');
             dasPassword = null;
 
-            //create event stream
+            //create event stream // The payload data is as>> actual process variables list and at the end "process instance id"
             PCAnalyticsServerHolder.getInstance().getStreamAdminServiceClient()
                     .createEventStream(session, streamName, stremaVersion, streamId, streamNickName, streamDescription,
                             processVariablesJObArr);
             if (log.isDebugEnabled()) {
-                log.info("Created the Event Stream: " + streamId + " in WSO2 DAS on :" + DASUrl);
+                log.info("Created the Event Stream: " + streamId + " in WSO2 DAS on :" + dasUrl);
             }
 
             //create event receiver
@@ -125,29 +126,29 @@ public class DASConfigClient {
             }
 
             //now send the REST Post call to the WSO2 BPS to communicate the analytics configuration details to the BPS from PC
-            BPSConfigRestClient.post(DASconfigDetails, processName, processVersion);
+            BPSConfigRestClient.post(dasConfigDetails, processName, processVersion);
 
             //logging out from DAS Admin Services
             loginServiceClient.logOut();
         } catch (LoginAuthenticationExceptionException e) {
-            String errMsg = "Error in Login to DAS at :" + DASUrl + "trying to login with username:" + dasUsername
+            String errMsg = "Error in Login to DAS at :" + dasUrl + "trying to login with username:" + dasUsername
                     + " and the given password";
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
         } catch (LogoutAuthenticationExceptionException e) {
-            String errMsg = "Error in Logout from DAS at :" + DASUrl;
+            String errMsg = "Error in Logout from DAS at :" + dasUrl;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
         } catch (AxisFault | JSONException | XMLStreamException e) {
-            String errMsg = "Error in DAS configuration, using :" + DASconfigDetails;
+            String errMsg = "Error in DAS configuration, using :" + dasConfigDetails;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
         } catch (RemoteException e) {
-            String errMsg = "Error in DAS configuration, using :" + DASconfigDetails;
+            String errMsg = "Error in DAS configuration, using :" + dasConfigDetails;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
         } catch (IOException e) {
-            String errMsg = "Error in DAS configuration, using :" + DASconfigDetails;
+            String errMsg = "Error in DAS configuration, using :" + dasConfigDetails;
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
         } catch (ProcessCenterException e) {

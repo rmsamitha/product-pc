@@ -27,8 +27,8 @@ var dasConfigData = String(request.getParameter("dasConfigData"));
 var processName = String(request.getParameter("processName"));
 var processVersion = String(request.getParameter("processVersion"));
 try{
-    ps.saveStreamAndReceiverInfo(dasConfigData,processName,processVersion);
     dasConfigClient.configDAS(dasConfigData,processName,processVersion);
+    ps.saveStreamAndReceiverInfo(dasConfigData,processName,processVersion);
     DASConfigurationUtils.setPropertyDASAnalyticsConfigured(processName, processVersion);
     print("SUCCESS");
 }catch(error){

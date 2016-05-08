@@ -39,12 +39,12 @@ public class BPSConfigRestClient {
     /**
      * Send post request to a BPS BPMN rest web service
      *
-     * @param message        is the request message that need to be sent to the web service
+     * @param dasConfigDetails        is the request message that need to be sent to the web service
      * @param processName
      * @param processVersion
      * @return the result as a String
      */
-    public static void post(String message, String processName, String processVersion)
+    public static void post(String dasConfigDetails, String processName, String processVersion)
             throws IOException, XMLStreamException, RuntimeException {
 
         String bpsurl = DASConfigurationUtils.getBPSURL();
@@ -54,7 +54,7 @@ public class BPSConfigRestClient {
 
         PostMethod postRequest = new PostMethod(requestUrl);
         postRequest.setRequestHeader("Authorization", DASConfigurationUtils.getAuthorizationHeader());
-        StringRequestEntity input = new StringRequestEntity(message, "application/json", "UTF-8");
+        StringRequestEntity input = new StringRequestEntity(dasConfigDetails, "application/json", "UTF-8");
         postRequest.setRequestEntity(input);
 
         int returnCode = httpClient.executeMethod(postRequest);
