@@ -79,7 +79,7 @@ public class ProcessStore {
                 Resource resourceAsset = reg.get(resourcePath);
                 String resourceContent = new String((byte[]) resourceAsset.getContent());
 
-                JSONObject conObj = new JSONObject();
+                JSONObject procVariablesJob = new JSONObject();
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder;
                 builder = factory.newDocumentBuilder();
@@ -87,7 +87,7 @@ public class ProcessStore {
 
                 JSONArray variableArray = new JSONArray();
 
-                conObj.put("processVariables", variableArray);
+                procVariablesJob.put("processVariables", variableArray);
 
                 NodeList processVariableElements = ((Element) document.getFirstChild())
                         .getElementsByTagName("process_variable");
@@ -99,14 +99,18 @@ public class ProcessStore {
                                 .getTextContent();
                         String processVariableType = processVariableElement.getElementsByTagName("type").item(0)
                                 .getTextContent();
+                        String isAnalyzeData = processVariableElement.getElementsByTagName("isAnalyzeData").item(0).getTextContent();
+                        String isDrillDownVariable = processVariableElement.getElementsByTagName("isDrillDownVariable").item(0).getTextContent();
 
                         JSONObject processVariable = new JSONObject();
                         processVariable.put("name", processVariableName);
                         processVariable.put("type", processVariableType);
+                        processVariable.put("isAnalyzeData",isAnalyzeData);
+                        processVariable.put("isDrillDownVariable",isDrillDownVariable);
                         variableArray.put(processVariable);
                     }
                 }
-                resourceString = conObj.toString();
+                resourceString = procVariablesJob.toString();
             }
         } catch (Exception e) {
             String errMsg = "Failed to get the process variables list";
@@ -144,14 +148,16 @@ public class ProcessStore {
                 //saving pracess variable name,type as sub elements
                 while (keys.hasNext()) {
                     String variableName = (String) keys.next();
-                    //if (Debugger.isEnabled())
-                    log.debug(variableName);
-                    String variableType = processVariablesJOb.get(variableName).toString();
-                    //JSONObject processVariableJOb= (JSONObject) processVariablesArray.get(i);
+                    String[] varMetaData = processVariablesJOb.get(variableName).toString().split("##");
+                    String variableType = varMetaData[0];
+                    String isAnalyzeData = varMetaData[1];
+                    String isDrillDownVariable = varMetaData[2];
                     Element rootElement = doc.getDocumentElement();
                     Element variableElement = append(doc, rootElement, "process_variable", ProcessStoreConstants.MNS);
                     appendText(doc, variableElement, "name", ProcessStoreConstants.MNS, variableName);
                     appendText(doc, variableElement, "type", ProcessStoreConstants.MNS, variableType);
+                    appendText(doc, variableElement, "isAnalyzeData", ProcessStoreConstants.MNS, isAnalyzeData);
+                    appendText(doc, variableElement, "isDrillDownVariable", ProcessStoreConstants.MNS, isDrillDownVariable);
 
                     String newProcessContent = xmlToString(doc);
                     resource.setContent(newProcessContent);

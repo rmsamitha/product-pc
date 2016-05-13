@@ -926,29 +926,43 @@ function redirectTo(element) {
 /*
  Add a new row for a new process variable to the process Variables table in the Config Analytics view
  */
+var beginRowNo = 0;
 function addProcessVariableRow(tableID) {
 
     var table = document.getElementById(tableID);
-
-    var rowCount = table.rows.length;
-    var row = table.insertRow(rowCount);
-
-    var colCount = 3;// table.rows[0].cells.length;
+    beginRowNo++;
+    var row = table.insertRow(table.rows.length);
 
     row.innerHTML =
-        //'<div style="width:300px; display:table">'+
         '<td><input type="checkbox" name="chk"/></td>' +
-
         '<td><input type="text" name="txt" style="display:table-cell; width:100%; padding-left: 8px;" width:100%"/></td>' +
         '<td>' +
-        '<select name="country" style="display:table-cell; width:100%">' +
+        '<select id="selVarType_' + beginRowNo + '" name="varType" style="display:table-cell; width:100%" onchange="disableCheckBox(' + beginRowNo + ')">' +
         '<option value="int">int</option>' +
         '<option value="string">string</option>' +
         '<option value="float">float</option>' +
-        '<option value="boolean">boolean</option>' +
+        '<option value="bool">bool</option>' +
         '</select>' +
-        '</td>';//+
-    // '</div>';
+        '</td>' +
+        '<td align="center" style="outline: thin solid #66c2ff"><input id="chkAnalyzedData_' + beginRowNo + '" type="checkbox" name="chkAnalyzedData" /></td>' +
+        '<td align="center" style="outline: thin solid #66c2ff"><input id="chkDrillData_' + beginRowNo + '" type="checkbox" name="chkDrillData" disabled/></td>';
+}
+
+/*
+ Disable process variable's "Analyzing Data" and "Drill Down Variable" check boxes accordingly to the data type of the variable
+ */
+function disableCheckBox(rowIndex) {
+    var e = document.getElementById("selVarType_" + rowIndex);
+    var varType = e.options[e.selectedIndex].value;
+    if (varType === "string" || varType == "bool") {
+        document.getElementById("chkAnalyzedData_" + rowIndex).checked = false;
+        document.getElementById("chkAnalyzedData_" + rowIndex).disabled = true;
+        document.getElementById("chkDrillData_" + rowIndex).disabled = false;
+    } else {
+        document.getElementById("chkDrillData_" + rowIndex).checked = false;
+        document.getElementById("chkDrillData_" + rowIndex).disabled = true;
+        document.getElementById("chkAnalyzedData_" + rowIndex).disabled = false;
+    }
 }
 
 /*
@@ -1015,11 +1029,15 @@ function saveProcessVariables(tableID, callback) {
         }
         var variableName = row.cells[1].children[0].value;
         var variableType = row.cells[2].children[0].value;
+        var isAnalyzdData = row.cells[3].children[0].checked;
+        var isDrillDownData = row.cells[4].children[0].checked;
 
         if (null != variableName && null != variableType) {
-            processVariables[variableName] = variableType;
+            processVariables[variableName] = variableType + "##" + isAnalyzdData + "##" + isDrillDownData;
             item["name"] = variableName;
             item["type"] = variableType;
+            item["isAnalyzeData"] = isAnalyzdData;
+            item["isDrillDownData"] = isDrillDownData;
             processVariablesObjsArr.push(item);
         }
     }
@@ -1105,13 +1123,11 @@ function configAnalytics() {
         var procInstancIdItem = {};
         procInstancIdItem["name"] = "processInstanceId";
         procInstancIdItem["type"] = "string";
+        procInstancIdItem["isAnalyzeData"] = "false";
+        procInstancIdItem["isDrillDownData"] = "false";
         processVariablesObjsArr.push(procInstancIdItem);
 
         dasConfigData["processVariables"] = processVariablesObjsArr;
-
-        var bpsConfigData = {};
-        // bpsConfigData["processVariables"]=processVariablesObjsArr;
-
 
         $.ajax({
             url: '/publisher/assets/process/apis/config_das_analytics',
@@ -1139,33 +1155,9 @@ function configAnalytics() {
                             $(this).find("select").attr("disabled", "true");
                         });
                     });
-                    //window.location.reload(true);
                     showOverview(this);
                     document.getElementById("btn_config_analytics").innerHTML = "View Analytics Configs";
                     $('#hiddenElementIsDASConfiged').val("true");
-
-                    ///
-                    /*/
-                     //config BPS for variable analytics
-                     /*$.ajax({
-                     url:'/publisher/assets/process/apis/config_bps_for_var_analytics',
-                     type:'post',
-                     data:{
-                     'processVariables':JSON.stringify(processVariablesObjsArr),
-                     'processName': processName,
-                     },
-                     // success:
-                     });*/
-                    /*$.ajax({
-                     url: '',
-                     type: 'post',
-                     data: {
-                     'processVariables': JSON.stringify(processVariablesObjsArr),
-                     'processName': processName,
-                     }
-                     // success:
-                     });*/
-
 
                 } else {
                     alertify.error("Error in creating Event Stream/Reciever in DAS")

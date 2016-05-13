@@ -189,5 +189,3 @@ asset.renderer = function (ctx) {
         }
     };
 };
-
-
