@@ -36,7 +36,6 @@ import org.wso2.carbon.pc.core.ProcessCenterException;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -50,7 +49,7 @@ public class DASConfigClient {
     String streamDescription;
     String streamNickName;
     String receiverName;
-    JSONArray processVariablesJObArr;
+    JSONArray processVariables;
     String dasUrl = null;
     private static final Log log = LogFactory.getLog(DASConfigClient.class);
 
@@ -58,7 +57,16 @@ public class DASConfigClient {
      * Configure WSO2 DAS for analytics, by creating an Event Stream, Event Receiver for each process.
      * In the event stream a field for processInstanceId too would be set.
      *
-     * @param dasConfigDetails Data given by the user for the configurations
+     * @param dasConfigDetails Data given by the user for the configurations. Ex:
+     *    {"processDefinitionId":"myProcess:1:27504","eventStreamName":"j_77_process_stream",
+     *    "eventStreamVersion":"1.0.0","eventStreamDescription":"This is the event stream generated to configure process
+     *    analytics with DAS, for the processj_77","eventStreamNickName":"j_77_process_stream","eventStreamId":
+     *    "j_77_process_stream:1.0.0","eventReceiverName":"j_77_process_receiver","pcProcessId":"j:77",
+     *    "processVariables":[{"name":"processInstanceId","type":"string","isAnalyzeData":"false","isDrillDownData":"false"},
+     *    {"name":"valuesAvailability","type":"string","isAnalyzeData":"false","isDrillDownData":"false"},
+     *    {"name":"custid","type":"string","isAnalyzeData":false,"isDrillDownData":false},
+     *    {"name":"amount","type":"long","isAnalyzeData":false,"isDrillDownData":false},
+     *    {"name":"confirm","type":"bool","isAnalyzeData":false,"isDrillDownData":false}]}
      * @throws ProcessCenterException
      * @throws RemoteException
      * @throws LogoutAuthenticationExceptionException
@@ -72,16 +80,17 @@ public class DASConfigClient {
         char[] dasPassword = null;
 
         try {
-            String requestHeader = "Basic ";
+            //String requestHeader = "Basic ";
             OMElement configElement = DASConfigurationUtils.getConfigElement();
             SecretResolver secretResolver = SecretResolverFactory.create(configElement, false);
-            OMElement analyticsElement = configElement
-                    .getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));
+            /*OMElement analyticsElement = configElement
+                    .getFirstChildWithName(new QName(AnalyticsConfigConstants.ANALYTICS));*/
             dasUsername = DASConfigurationUtils.getDASUserName();
             ///
             if (secretResolver != null && secretResolver.isInitialized()) {
                 if (secretResolver.isTokenProtected(AnalyticsConfigConstants.SECRET_ALIAS_DAS_PASSWORD)) {
-                    dasPassword = secretResolver.resolve(AnalyticsConfigConstants.SECRET_ALIAS_DAS_PASSWORD).toCharArray();
+                    dasPassword = secretResolver.resolve(AnalyticsConfigConstants.SECRET_ALIAS_DAS_PASSWORD)
+                            .toCharArray();
                 } else {
                     dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
                 }
@@ -89,7 +98,6 @@ public class DASConfigClient {
                 dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
             }
 
-            //dasPassword = DASConfigurationUtils.getDASPassword().toCharArray();
             dasUrl = DASConfigurationUtils.getDASURL();
             dasConfigDetailsJOb = new JSONObject(dasConfigDetails);
             streamName = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_NAME);
@@ -98,8 +106,7 @@ public class DASConfigClient {
             streamDescription = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_DESCRIPTION);
             streamNickName = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_STREAM_NICK_NAME);
             receiverName = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.EVENT_RECEIVER_NAME);
-            processVariablesJObArr = dasConfigDetailsJOb.getJSONArray(AnalyticsConfigConstants.PROCESS_VARIABLES);
-            //pcProcessId = dasConfigDetailsJOb.getString(AnalyticsConfigConstants.PC_PROCESS_ID);
+            processVariables = dasConfigDetailsJOb.getJSONArray(AnalyticsConfigConstants.PROCESS_VARIABLES);
 
             //login to DAS
             loginServiceClient = PCAnalyticsServerHolder.getInstance().getLoginAdminServiceClient();
@@ -109,12 +116,13 @@ public class DASConfigClient {
             Arrays.fill(dasPassword, ' ');
             dasPassword = null;
 
-            //create event stream // The payload data is as>> actual process variables list and at the end "process instance id"
+            //create event stream // The payload data is as>> "process instance id, valueAvailability, actual process
+            // variables list
             PCAnalyticsServerHolder.getInstance().getStreamAdminServiceClient()
                     .createEventStream(session, streamName, stremaVersion, streamId, streamNickName, streamDescription,
-                            processVariablesJObArr);
+                            processVariables);
             if (log.isDebugEnabled()) {
-                log.info("Created the Event Stream: " + streamId + " in WSO2 DAS on :" + dasUrl);
+                log.debug("Created the Event Stream: " + streamId + " in WSO2 DAS on :" + dasUrl);
             }
 
             //create event receiver
@@ -122,16 +130,17 @@ public class DASConfigClient {
                     .deployEventReceiverConfiguration(session, receiverName, streamId,
                             AnalyticsConfigConstants.WSO2_EVENT);
             if (log.isDebugEnabled()) {
-                log.info("Created the Event Receiver: " + receiverName + "for the " + streamId + " in WSO2 DAS");
+                log.debug("Created the Event Receiver: " + receiverName + " for the " + streamId + " in WSO2 DAS");
             }
 
-            //now send the REST Post call to the WSO2 BPS to communicate the analytics configuration details to the BPS from PC
+            //now send the REST Post call to the WSO2 BPS to communicate the analytics configuration details to the
+            // BPS from PC
             BPSConfigRestClient.post(dasConfigDetails, processName, processVersion);
 
             //logging out from DAS Admin Services
             loginServiceClient.logOut();
         } catch (LoginAuthenticationExceptionException e) {
-            String errMsg = "Error in Login to DAS at :" + dasUrl + "trying to login with username:" + dasUsername
+            String errMsg = "Error in Login to DAS at :" + dasUrl + "trying to login with username : " + dasUsername
                     + " and the given password";
             log.error(errMsg, e);
             throw new ProcessCenterException(errMsg, e);
@@ -154,11 +163,10 @@ public class DASConfigClient {
         } catch (ProcessCenterException e) {
             log.error(e.getMessage(), e);
             throw new ProcessCenterException(e.getMessage(), e);
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
             throw new ProcessCenterException(e.getMessage(), e);
-        }
-        finally {
+        } finally {
             loginServiceClient.logOut();
         }
     }

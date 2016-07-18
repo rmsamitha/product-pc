@@ -316,7 +316,8 @@ function showAnalyticsConfigurer(streamAndReceiverInfo) {
     } else {
         $('#eventStreamName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream");
         $('#eventStreamVersion').val("1.0.0");
-        $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with DAS, for the process" + $('#view-header').text() + "_" + $('#process-version').text());
+        $('#eventStreamDescription').val("This is the event stream generated to configure process analytics with" +
+                " DAS, for the process : " + $('#view-header').text() + "_" + $('#process-version').text());
         $('#eventStreamNickName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_stream"); //same as eventStreamName
         $('#eventReceiverName').val($('#view-header').text() + "_" + $('#process-version').text() + "_process_receiver");
     }
@@ -934,18 +935,22 @@ function addProcessVariableRow(tableID) {
     var row = table.insertRow(table.rows.length);
 
     row.innerHTML =
-        '<td><input type="checkbox" name="chk"/></td>' +
-        '<td><input type="text" name="txt" style="display:table-cell; width:100%; padding-left: 8px;" width:100%"/></td>' +
-        '<td>' +
-        '<select id="selVarType_' + beginRowNo + '" name="varType" style="display:table-cell; width:100%" onchange="disableCheckBox(' + beginRowNo + ')">' +
-        '<option value="int">int</option>' +
-        '<option value="string">string</option>' +
-        '<option value="float">float</option>' +
-        '<option value="bool">bool</option>' +
-        '</select>' +
-        '</td>' +
-        '<td align="center" style="outline: thin solid #66c2ff"><input id="chkAnalyzedData_' + beginRowNo + '" type="checkbox" name="chkAnalyzedData" /></td>' +
-        '<td align="center" style="outline: thin solid #66c2ff"><input id="chkDrillData_' + beginRowNo + '" type="checkbox" name="chkDrillData" disabled/></td>';
+            '<td><input type="checkbox" name="chk"/></td>' +
+            '<td><input type="text" name="txt" style="display:table-cell; width:100%; padding-left: 8px;" width:100%"/>' +
+            '</td>' + '<td>' +
+            '<select id="selVarType_' + beginRowNo + '" name="varType" style="display:table-cell; width:100%" ' +
+            'onchange="disableCheckBox(' + beginRowNo + ')">' +
+            '<option value="int">int</option>' +
+            '<option value="long">long</option>' +
+            '<option value="double">double</option>' +
+            '<option value="float">float</option>' +
+            '<option value="string">string</option>' +
+            '<option value="bool">bool</option>' +
+            '</select>' + '</td>' +
+            '<td align="center" style="outline: thin solid #66c2ff"><input id="chkAnalyzedData_' + beginRowNo + '" ' +
+            'type="checkbox" name="chkAnalyzedData" /></td>' +
+            '<td align="center" style="outline: thin solid #66c2ff"><input id="chkDrillData_' + beginRowNo + '" ' +
+            'type="checkbox" name="chkDrillData" disabled/></td>';
 }
 
 /*
@@ -994,9 +999,13 @@ function deleteProcessVariableRow(tableID) {
     }
 }
 
+//object to keep meta data on process variables with related processName, processVersion.This will be sent to save
+// in process rxt
 var processVariablesInfo = {};
 var processVariables = {};
-var processVariablesObjsArr = [];
+
+//Information on event stream payload data fields (this includes processVariables)
+var eventStreamPayloadFields = [];
 
 /*
  Save the process variables which need to be configured for analytics, in process rxt in Governance Registry
@@ -1019,6 +1028,24 @@ function saveProcessVariables(tableID, callback) {
     //put processInstanceId as a compulsory field in the stream
     //processVariables["processInstanceId"] = "string";
 
+    //add process instanceId field to the process variables objects array, so that there will be a field (as
+    // 1st field) for that processInstanceId too in the event Stream that will be created in DAS
+    var procInstancIdItem = {};
+    procInstancIdItem["name"] = "processInstanceId";
+    procInstancIdItem["type"] = "string";
+    procInstancIdItem["isAnalyzeData"] = false;
+    procInstancIdItem["isDrillDownData"] = false;
+    eventStreamPayloadFields.push(procInstancIdItem);
+
+    //add field to get process_variable_values availability string to the eventStreamPayloadFields array, so that there
+    // will be a field (as 2nd field) for that valuesAvailability too in the event Stream that will be created in DAS
+    var valuesAvailabilityField = {};
+    valuesAvailabilityField["name"] = "valuesAvailability";
+    valuesAvailabilityField["type"] = "string";
+    valuesAvailabilityField["isAnalyzeData"] = false;
+    valuesAvailabilityField["isDrillDownData"] = false;
+    eventStreamPayloadFields.push(valuesAvailabilityField);
+
 
     for (var i = 1; i < rowCount; i++) {
         var item = {};
@@ -1038,7 +1065,7 @@ function saveProcessVariables(tableID, callback) {
             item["type"] = variableType;
             item["isAnalyzeData"] = isAnalyzdData;
             item["isDrillDownData"] = isDrillDownData;
-            processVariablesObjsArr.push(item);
+            eventStreamPayloadFields.push(item);
         }
     }
     processVariablesInfo["processVariables"] = processVariables;
@@ -1118,16 +1145,9 @@ function configAnalytics() {
         dasConfigData["eventReceiverName"] = eventReceiverName;
         dasConfigData["pcProcessId"] = pcProcessId;
 
-        //adding process instanceId field to the process variables objects array, so that there will be a field for that
-        //processInstanceId too in the event Stream that will be created in DAS
-        var procInstancIdItem = {};
-        procInstancIdItem["name"] = "processInstanceId";
-        procInstancIdItem["type"] = "string";
-        procInstancIdItem["isAnalyzeData"] = "false";
-        procInstancIdItem["isDrillDownData"] = "false";
-        processVariablesObjsArr.push(procInstancIdItem);
 
-        dasConfigData["processVariables"] = processVariablesObjsArr;
+
+        dasConfigData["processVariables"] = eventStreamPayloadFields;
 
         $.ajax({
             url: '/publisher/assets/process/apis/config_das_analytics',

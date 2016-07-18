@@ -55,14 +55,25 @@ public class StreamAdminServiceClient {
         serviceAdminStub = new EventStreamAdminServiceStub(endPoint);
     }
 
-
     /**
-     * Create an Event Stream in DAS for the perticular process
      *
+     * @param session
+     * @param streamName
+     * @param streamVersion
+     * @param streamId
+     * @param streamNickName
+     * @param streamDescription
+     * @param processVariables Event stream payload fields including process variables.<p> Ex:
+     * [{"isAnalyzeData":false,"name":"processInstanceId","isDrillDownData":"false", "type":"string"},
+     * {"isAnalyzeData":false,"name":"valuesAvailability","isDrillDownData":"false","type":"string"},
+     * {"isAnalyzeData":false,"name":"custid","isDrillDownData":false,"type":"string"},
+     * {"isAnalyzeData":false,"name":"amount","isDrillDownData":false,"type":"long"},
+     * {"isAnalyzeData":false,"name":"confirm","isDrillDownData":false,"type":"bool"}]
      * @throws ProcessCenterException
      */
-    public void createEventStream(String session, String streamName, String streamVersion,
-            String streamId, String streamNickName, String streamDescription, JSONArray processVariablesJObArr) throws ProcessCenterException {
+    public void createEventStream(String session, String streamName, String streamVersion, String streamId,
+            String streamNickName, String streamDescription, JSONArray processVariables) throws ProcessCenterException {
+
         JSONObject streamDefinitionJsonOb = new JSONObject();
         try {
             // Authenticate stub from sessionCooke
@@ -78,19 +89,18 @@ public class StreamAdminServiceClient {
             streamDefinitionJsonOb.put("description", streamDescription);
 
             //setting process variables as payloadData into the eventStream definition
-            streamDefinitionJsonOb.put("payloadData", processVariablesJObArr);
+            streamDefinitionJsonOb.put("payloadData", processVariables);
 
-            if(log.isDebugEnabled()) {
-                log.debug("Strem Definition Json Object:"+streamDefinitionJsonOb.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Strem Definition Json Object:" + streamDefinitionJsonOb.toString());
             }
 
             serviceAdminStub.addEventStreamDefinitionAsString(streamDefinitionJsonOb.toString());
 
         } catch (JSONException e) {
-            String errMsg =
-                    "Error in creating event stream Definition Json object with data: " + "," + session
-                            + "," + streamName + "," + streamVersion + "," + streamId + "," + streamNickName + ","
-                            + streamDescription + "," + processVariablesJObArr.toString();
+            String errMsg = "Error in creating event stream Definition Json object with data: " + "," + session + ","
+                    + streamName + "," + streamVersion + "," + streamId + "," + streamNickName + "," + streamDescription
+                    + "," + processVariables.toString();
             throw new ProcessCenterException(errMsg, e);
         } catch (RemoteException e) {
             String errMsg =
